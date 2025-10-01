@@ -1,0 +1,24 @@
+#!/bin/sh
+# commit-msg: Valida formato simples do commit (tipo: descrição)
+
+set -e
+
+MSG_FILE="$1"
+MSG=$(head -n1 "$MSG_FILE" | tr -d '\r')
+
+# Allow merge/revert/version commits
+case "$MSG" in
+  ""|Merge*|Revert*|v[0-9]*|release*|chore*|fix*|feat*|docs*|refactor*|test*|perf*|style*|build*|ci*|revert*) exit 0 ;;
+  *) ;;
+esac
+
+# Enforce minimal: <type>: <subject>
+if echo "$MSG" | grep -Eq '^[a-zA-Z]+: .+'; then
+  exit 0
+fi
+
+printf "\033[31m✗ Formato de commit inválido. Use <type>: <mensagem>. Exemplos:\n\n"
+printf "  feat: adicionar lobby chamativo\n"
+printf "  fix: corrigir hmr no GameContext\n"
+printf "  chore: atualizar README com Makefile\n\033[0m\n"
+exit 1

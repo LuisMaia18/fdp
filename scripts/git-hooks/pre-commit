@@ -1,0 +1,21 @@
+#!/bin/sh
+# pre-commit: Lint rápido e formatação leve antes de commit
+
+# Fail fast
+set -e
+
+# Detect package manager
+if [ -f pnpm-lock.yaml ]; then PM=pnpm; elif [ -f yarn.lock ]; then PM=yarn; else PM=npm; fi
+
+printf "\033[34m> pre-commit: lint (staged)\033[0m\n"
+# Lint only staged JS/JSX files
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(jsx?)$' || true)
+if [ -n "$FILES" ]; then
+  if command -v npx >/dev/null 2>&1; then
+    npx eslint $FILES || exit 1
+  else
+    $PM run lint || exit 1
+  fi
+fi
+
+printf "\033[32m✓ pre-commit ok\033[0m\n"

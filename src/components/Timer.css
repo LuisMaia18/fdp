@@ -1,0 +1,149 @@
+/* Timer Styles */
+.timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.timer.urgent {
+  background: rgba(255, 193, 7, 0.2);
+  border: 2px solid #ffc107;
+}
+
+.timer.critical {
+  background: rgba(220, 53, 69, 0.2);
+  border: 2px solid #dc3545;
+  animation: timerPulse 1s infinite;
+}
+
+.timer-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timer-icon {
+  font-size: 1.2rem;
+}
+
+.timer-text {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  min-width: 60px;
+  text-align: center;
+}
+
+.timer.urgent .timer-text {
+  color: #ffc107;
+}
+
+.timer.critical .timer-text {
+  color: #dc3545;
+}
+
+.timer-progress {
+  width: 100px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  transition: width 1s ease;
+  border-radius: 3px;
+}
+
+.timer.urgent .progress-fill {
+  background: linear-gradient(45deg, #ffc107, #fd7e14);
+}
+
+.timer.critical .progress-fill {
+  background: linear-gradient(45deg, #dc3545, #e83e8c);
+}
+
+.timer-warning {
+  color: #dc3545;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: warningBlink 0.5s infinite alternate;
+}
+
+/* Animations */
+@keyframes timerPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(220, 53, 69, 0);
+  }
+}
+
+@keyframes warningBlink {
+  0% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timer {
+    padding: 12px 15px;
+  }
+  
+  .timer-text {
+    font-size: 1.2rem;
+  }
+  
+  .timer-progress {
+    width: 80px;
+    height: 5px;
+  }
+  
+  .timer-warning {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .timer {
+    padding: 10px 12px;
+  }
+  
+  .timer-text {
+    font-size: 1.1rem;
+  }
+  
+  .timer-progress {
+    width: 60px;
+    height: 4px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .timer.critical {
+    animation: none;
+  }
+  
+  .timer-warning {
+    animation: none;
+  }
+  
+  .progress-fill {
+    transition: none;
+  }
+}
