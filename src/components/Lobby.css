@@ -23,10 +23,29 @@
 /* Header */
 .lobby-header {
   margin-bottom: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 28px 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  position: relative;
+  overflow: hidden;
 }
+
+.lobby-header::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(60% 60% at 50% 0%, rgba(102,126,234,0.18), rgba(118,75,162,0.08) 40%, transparent 70%);
+  z-index: 0;
+}
+
+/* Back-compat class kept for spacing; actual visuals come from Mascot component */
+.mascot-hero { margin: 0 auto 16px; display: block; }
 
 .game-title {
   margin-bottom: 15px;
+  position: relative;
+  z-index: 1;
 }
 
 .title-main {
@@ -39,6 +58,7 @@
   -webkit-text-fill-color: transparent;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 10px;
+  animation: title-sheen 4s ease-in-out infinite;
 }
 
 .title-subtitle {
@@ -47,6 +67,8 @@
   color: #666;
   font-weight: 500;
   font-style: italic;
+  position: relative;
+  z-index: 1;
 }
 
 .game-description {
@@ -54,6 +76,13 @@
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes title-sheen {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); }
+  50% { filter: drop-shadow(0 4px 16px rgba(238,90,36,0.35)); }
 }
 
 /* Name Form */

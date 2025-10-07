@@ -30,6 +30,6 @@ export default defineConfig({
     include: ['react', 'react-dom']
   },
   define: {
-    __DEV__: JSON.stringify(process.env.NODE_ENV === 'development')
+    __DEV__: JSON.stringify(import.meta?.env?.MODE === 'development')
   }
 })

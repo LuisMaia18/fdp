@@ -24,6 +24,19 @@
   border-bottom: 2px solid rgba(102, 126, 234, 0.1);
 }
 
+.room-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mascot-inline {
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  display: inline-flex;
+}
+
 .room-title {
   font-size: 2.5rem;
   font-weight: 900;
@@ -63,6 +76,10 @@
   letter-spacing: 2px;
   font-family: 'Courier New', monospace;
 }
+.room-code.blurred {
+  filter: blur(6px);
+  user-select: none;
+}
 
 .copy-button {
   background: #667eea;
@@ -79,6 +96,22 @@
   background: #5a67d8;
   transform: scale(1.05);
 }
+.copy-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.toggle-stream-btn {
+  background: #edf2f7;
+  color: #1a202c;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.toggle-stream-btn:hover {
+  background: #e2e8f0;
+}
 
 .player-count {
   background: linear-gradient(45deg, #ff6b6b, #ee5a24);
@@ -87,6 +120,22 @@
   border-radius: 15px;
   font-weight: 600;
   font-size: 1.2rem;
+}
+
+.stream-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(26, 32, 44, 0.85);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.stream-mode-badge .badge-icon {
+  display: inline-flex;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
 }
 
 /* Players Section */
@@ -411,6 +460,36 @@
 
 .error-close:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: min(92vw, 420px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+.modal-title {
+  margin: 0 0 8px 0;
+  color: #1a202c;
+}
+.modal-text {
+  margin: 0 0 16px 0;
+  color: #4a5568;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Rules Section */

@@ -1,20 +1,20 @@
 import React from 'react';
-import { useGame } from '../contexts/GameContext';
 import './SubmittedAnswers.css';
 
-function SubmittedAnswers({ question, answers, onSelectWinner, canVote, currentPlayer }) {
-  const { state } = useGame();
-  
-  const shuffledAnswers = Object.entries(answers).sort(() => Math.random() - 0.5);
+function SubmittedAnswers({ question, answers, onSelectWinner, canVote, currentPlayer, order }) {
+  // Gera uma lista em ordem estável. Se 'order' foi definido pelo host, segue essa ordem.
+  const entries = Object.entries(answers);
+  const orderedAnswers = order && Array.isArray(order) && order.length
+    ? order
+        .filter((playerId) => answers[playerId] !== undefined)
+        .map((playerId) => [playerId, answers[playerId]])
+    : entries.sort((a, b) => a[0].localeCompare(b[0]));
 
   const formatQuestionWithAnswer = (question, answer) => {
     return question.replace('______', `**${answer}**`);
   };
 
-  const getPlayerByAnswer = (answerText) => {
-    const playerId = Object.keys(answers).find(id => answers[id] === answerText);
-    return state.players.find(p => p.id === playerId);
-  };
+  // removed unused getPlayerByAnswer (lint)
 
   const handleAnswerClick = (playerId) => {
     if (canVote) {
@@ -40,8 +40,7 @@ function SubmittedAnswers({ question, answers, onSelectWinner, canVote, currentP
       </div>
 
       <div className="answers-grid">
-        {shuffledAnswers.map(([playerId, answer], index) => {
-          const player = state.players.find(p => p.id === playerId);
+        {orderedAnswers.map(([playerId, answer], index) => {
           const isCurrentPlayerAnswer = playerId === currentPlayer?.id;
           
           return (

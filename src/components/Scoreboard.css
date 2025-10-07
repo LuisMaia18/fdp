@@ -8,6 +8,56 @@
   width: 100%;
 }
 
+/* Compact version for final winner screen */
+.expanded-scoreboard-wrapper .scoreboard {
+  padding: 8px 4px;
+  max-width: 100%;
+}
+
+.expanded-scoreboard-wrapper .scoreboard-header {
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+}
+
+.expanded-scoreboard-wrapper .scoreboard-header h2 {
+  font-size: 1.05rem;
+  margin-bottom: 2px;
+}
+
+.expanded-scoreboard-wrapper .winning-score {
+  font-size: 0.85rem;
+}
+
+.expanded-scoreboard-wrapper .players-ranking {
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.expanded-scoreboard-wrapper .player-rank {
+  padding: 6px 6px;
+  gap: 6px;
+  border-width: 1.5px;
+}
+
+.expanded-scoreboard-wrapper .player-avatar {
+  width: 22px;
+  height: 22px;
+}
+
+.expanded-scoreboard-wrapper .player-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.expanded-scoreboard-wrapper .score-number {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.expanded-scoreboard-wrapper .score-label {
+  font-size: 0.7rem;
+}
+
 .scoreboard-header {
   text-align: center;
   margin-bottom: 30px;

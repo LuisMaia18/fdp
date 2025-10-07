@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame } from '../contexts/GameContext';
 import './WaitingRoom.css';
+import Mascot from './Mascot';
 
 function WaitingRoom() {
   const { state, actions, GAME_STATES } = useGame();
   const [gameConfig, setGameConfig] = useState(state.gameConfig);
   const [showConfig, setShowConfig] = useState(false);
+  // Preferência local do host para ocultar o código para si também
+  const [hideForMe, setHideForMe] = useState(false);
+  // Quando o host ativa/desativa o Stream Mode, por padrão ocultamos/mostramos para ele também
+  useEffect(() => {
+    if (state.isHost) {
+      setHideForMe(!!state.streamMode);
+    }
+  }, [state.streamMode, state.isHost]);
 
   const handleStartGame = () => {
     if (state.players.length < state.gameConfig.minPlayers) {
@@ -32,6 +41,7 @@ function WaitingRoom() {
   };
 
   const copyRoomCode = () => {
+    if (!state.isHost) return; // somente host pode copiar
     navigator.clipboard.writeText(state.roomCode).then(() => {
       // Simulação de feedback visual
       const button = document.querySelector('.copy-button');
@@ -44,6 +54,10 @@ function WaitingRoom() {
 
   // Simulação de adicionar bot para teste (removeria em produção)
   const addTestBot = () => {
+    if (!state.isHost) {
+      actions.setError('Somente o host pode adicionar bots.');
+      return;
+    }
     const botNames = ['Bot Malandro', 'Bot Escroto', 'Bot Safado', 'Bot Debochado', 'Bot Inconveniente'];
     const availableNames = botNames.filter(name => 
       !state.players.some(p => p.name === name)
@@ -67,18 +81,68 @@ function WaitingRoom() {
       <div className="waiting-room-container">
         {/* Header */}
         <div className="room-header">
-          <h1 className="room-title">Sala de Espera</h1>
+          <div className="room-title-wrap">
+            <Mascot variant="inline" size={42} className="mascot-inline" />
+            <h1 className="room-title">Sala de Espera</h1>
+          </div>
           <div className="room-info">
             <div className="room-code-display">
               <span className="room-code-label">Código da Sala:</span>
-              <span className="room-code">{state.roomCode}</span>
-              <button className="copy-button" onClick={copyRoomCode}>
-                📋 Copiar
-              </button>
+              <span 
+                className={`room-code ${state.streamMode && (!state.isHost || hideForMe) ? 'blurred' : ''}`}
+                title={state.streamMode 
+                  ? (state.isHost 
+                    ? (hideForMe 
+                      ? 'Stream Mode ativo: código oculto para você e para os outros jogadores' 
+                      : 'Stream Mode ativo: código visível para você e oculto para os outros') 
+                    : 'Stream Mode: código oculto pelo host') 
+                  : 'Código da sala'}
+              >
+                {state.roomCode}
+              </span>
+              {state.isHost ? (
+                <button className="copy-button" onClick={copyRoomCode} disabled={!state.roomCode}>
+                  📋 Copiar
+                </button>
+              ) : (
+                <button className="copy-button" disabled title="Somente o host pode copiar">📋 Copiar</button>
+              )}
+              {state.isHost && (
+                <button 
+                  className="toggle-stream-btn"
+                  onClick={() => actions.setStreamMode(!state.streamMode)}
+                  title={state.streamMode ? 'Desativar Stream Mode (mostrar código)' : 'Ativar Stream Mode (ocultar código)'}
+                  aria-pressed={state.streamMode}
+                >
+                  {state.streamMode ? '🙈' : '👁️'}
+                </button>
+              )}
+              {state.isHost && state.streamMode && (
+                <button 
+                  className="toggle-stream-btn"
+                  onClick={() => setHideForMe(!hideForMe)}
+                  title={hideForMe ? 'Mostrar código para mim' : 'Ocultar código para mim também'}
+                  aria-pressed={hideForMe}
+                >
+                  {hideForMe ? '👁️‍🗨️' : '🙊'}
+                </button>
+              )}
             </div>
             <div className="player-count">
               {state.players.length}/{state.gameConfig.maxPlayers} jogadores
             </div>
+            {state.streamMode && (
+              <div
+                className="stream-mode-badge"
+                title={state.isHost
+                  ? 'Stream Mode ativo: o código está visível para você e oculto para os demais jogadores.'
+                  : 'Stream Mode ativo: o host ocultou o código da sala.'}
+                aria-label="Stream Mode ativo"
+              >
+                <span className="badge-icon" aria-hidden>🙈</span>
+                {state.isHost ? 'Stream Mode ativo' : 'Código oculto pelo host'}
+              </div>
+            )}
           </div>
         </div>
 
@@ -215,7 +279,7 @@ function WaitingRoom() {
               </button>
               
               {/* Botão para adicionar bot (apenas para testes) */}
-              {process.env.NODE_ENV === 'development' && state.players.length < state.gameConfig.maxPlayers && (
+              {import.meta.env.DEV && state.players.length < state.gameConfig.maxPlayers && (
                 <button 
                   className="btn btn-secondary"
                   onClick={addTestBot}
@@ -245,6 +309,30 @@ function WaitingRoom() {
             <span className="error-icon">⚠️</span>
             {state.error}
             <button className="error-close" onClick={() => actions.setError(null)}>×</button>
+          </div>
+        )}
+
+        {/* Kicked Modal */}
+        {state.kickedMessage && (
+          <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="kicked-title">
+            <div className="modal-card">
+              <h3 id="kicked-title" className="modal-title">Você foi removido</h3>
+              <p className="modal-text">{state.kickedMessage}</p>
+              <div className="modal-actions">
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    actions.setKickedMessage(null);
+                    // Volta para a tela inicial (Lobby)
+                    actions.setGameState(GAME_STATES.LOBBY);
+                    // Limpa sala/estado local para evitar re-entrada automática
+                    actions.resetGame();
+                  }}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

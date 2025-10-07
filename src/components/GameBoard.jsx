@@ -5,11 +5,13 @@ import SubmittedAnswers from './SubmittedAnswers';
 import Timer from './Timer';
 import Scoreboard from './Scoreboard';
 import './GameBoard.css';
+import Mascot from './Mascot';
 
 function GameBoard() {
   const { state, actions, GAME_STATES } = useGame();
   const [selectedAnswerCard, setSelectedAnswerCard] = useState(null);
   const [showScoreboard, setShowScoreboard] = useState(false);
+  const [roundTransitionSeconds, setRoundTransitionSeconds] = useState(0);
 
   const isCurrentPlayerFDP = state.currentPlayer?.id === state.currentFDP;
   const hasSubmittedAnswer = state.submittedAnswers[state.currentPlayer?.id];
@@ -19,15 +21,24 @@ function GameBoard() {
 
   // Auto-avançar para votação quando todos submeterem
   useEffect(() => {
-    if (state.gameState === GAME_STATES.PLAYING && allPlayersSubmitted && !isCurrentPlayerFDP) {
-      setTimeout(() => {
-        actions.setGameState(GAME_STATES.ROUND_VOTING);
-        if (state.gameConfig.votingTimer > 0) {
-          actions.startTimer(state.gameConfig.votingTimer);
-        }
-      }, 1000);
-    }
+    // Somente o host controla a transição de fase; clientes aguardam snapshot
+    // O host já trata a virada para ROUND_VOTING em GameContext ao detectar todas as respostas
   }, [allPlayersSubmitted, state.gameState, isCurrentPlayerFDP]);
+
+  // Exibe contagem regressiva durante tela de resultados (transição para próxima rodada)
+  useEffect(() => {
+    if (state.gameState === GAME_STATES.ROUND_RESULTS) {
+      const total = state.gameConfig?.resultsDelaySec ?? 3;
+      setRoundTransitionSeconds(total);
+      const id = setInterval(() => {
+        setRoundTransitionSeconds(prev => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(id);
+    } else {
+      setRoundTransitionSeconds(0);
+    }
+    // Only depends on gameState; total is read fresh inside
+  }, [state.gameState]);
 
   const handleSubmitAnswer = () => {
     if (selectedAnswerCard && !hasSubmittedAnswer) {
@@ -52,12 +63,7 @@ function GameBoard() {
     return question;
   };
 
-  const getPlayerByCard = (answerCard) => {
-    const playerId = Object.keys(state.submittedAnswers).find(
-      id => state.submittedAnswers[id] === answerCard
-    );
-    return state.players.find(p => p.id === playerId);
-  };
+  // (lint) removed unused getPlayerByCard
 
   const handleLeaveGame = () => {
     if (window.confirm('Tem certeza que deseja sair do jogo?')) {
@@ -65,11 +71,19 @@ function GameBoard() {
     }
   };
 
+  // Mascot reactions based on game state
+  const mascotEmoteClass = state.gameState === GAME_STATES.ROUND_RESULTS
+    ? ' emote-celebrate'
+    : state.error
+    ? ' emote-shake'
+    : '';
+
   return (
     <div className="game-board">
       {/* Header */}
       <div className="game-header">
         <div className="game-info">
+          <Mascot variant="inline" size={42} className={`mascot-inline${mascotEmoteClass}`} />
           <h1 className="game-title">Foi De Propósito</h1>
           <div className="round-info">
             <span className="round-text">
@@ -165,6 +179,9 @@ function GameBoard() {
                         <div className="submitted-answer">
                           <strong>Sua resposta:</strong> {hasSubmittedAnswer}
                         </div>
+                        <div className="submitted-full-sentence">
+                          {formatQuestionCard(state.currentQuestionCard, hasSubmittedAnswer)}
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -204,6 +221,7 @@ function GameBoard() {
                 onSelectWinner={handleSelectWinner}
                 canVote={isCurrentPlayerFDP}
                 currentPlayer={state.currentPlayer}
+                order={state.answerOrder}
               />
             </div>
           )}
@@ -235,12 +253,13 @@ function GameBoard() {
                   </div>
                 </div>
                 
-                <div className="next-round-info">
-                  <p>Próxima rodada começando...</p>
-                  <div className="loading-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                <div className="next-round-info" aria-live="polite">
+                  <p className="transition-note">Próxima rodada começando em {roundTransitionSeconds || 1}s...</p>
+                  <div className="transition-progress">
+                    <div
+                      className="transition-bar"
+                      style={{ width: `${(((state.gameConfig?.resultsDelaySec ?? 3) - Math.max(roundTransitionSeconds, 0)) / (state.gameConfig?.resultsDelaySec ?? 3)) * 100}%` }}
+                    />
                   </div>
                 </div>
               </div>
@@ -249,33 +268,38 @@ function GameBoard() {
 
           {state.gameState === GAME_STATES.GAME_OVER && (
             <div className="game-over-section">
-              <div className="game-over">
-                <h2>🏆 Fim de Jogo!</h2>
-                <div className="final-winner">
-                  <div className="winner-podium">
+              <div className="game-over expanded-game-over">
+                <h2 style={{ fontSize: '1.8rem', marginBottom: '0.8rem' }}>🏆 Fim de Jogo!</h2>
+                <div className="final-winner expanded-final-winner">
+                  <div className="winner-podium expanded-winner-podium">
                     <img 
                       src={state.players.find(p => p.id === state.roundWinner)?.avatar} 
                       alt="Final Winner"
-                      className="final-winner-avatar"
+                      className="final-winner-avatar expanded-final-winner-avatar"
                     />
-                    <h3>{state.players.find(p => p.id === state.roundWinner)?.name}</h3>
-                    <p>É o grande vencedor!</p>
-                    <div className="trophy">🏆</div>
+                    <h3 style={{ fontSize: '1.4rem', margin: '0.5rem 0', color: '#d4af37' }}>{state.players.find(p => p.id === state.roundWinner)?.name}</h3>
+                    <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#333', margin: '0.3rem 0' }}>É o grande FDP vencedor!</p>
+                    <div className="trophy" style={{ fontSize: '1.8rem', margin: '0.5rem 0' }}>🏆</div>
+                    <div className="winner-joke" style={{ fontSize: '0.95rem', color: '#764ba2', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                      {getFunnyPhrase(state.players.find(p => p.id === state.roundWinner)?.name)}
+                    </div>
                   </div>
                 </div>
-                
-                <Scoreboard showFinal={true} />
-                
-                <div className="game-over-actions">
+                <div className="expanded-scoreboard-wrapper">
+                  <Scoreboard showFinal={true} />
+                </div>
+                <div className="game-over-actions expanded-game-over-actions">
                   <button 
                     className="btn btn-primary"
                     onClick={() => actions.resetGame()}
+                    style={{ fontSize: '1rem', padding: '0.8rem 1.5rem' }}
                   >
                     🎮 Jogar Novamente
                   </button>
                   <button 
                     className="btn btn-secondary"
                     onClick={() => window.location.reload()}
+                    style={{ fontSize: '1rem', padding: '0.8rem 1.5rem' }}
                   >
                     🏠 Lobby
                   </button>
@@ -296,6 +320,47 @@ function GameBoard() {
       )}
     </div>
   );
+
+  // Função para frase engraçada
+  function getFunnyPhrase(name) {
+    const phrases = [
+      `Parabéns, ${name}! Agora você é oficialmente o FDP supremo!`,
+      `${name}, ganhou... mas será que jogou limpo? 🤔`,
+      `O resto só assiste enquanto ${name} humilha geral!`,
+      `FDP detectado: ${name}. Preparem-se para a revanche!`,
+      `Se fosse pra perder, eu nem vinha... né, ${name}?`,
+      `A lenda do FDP: ${name}. O chat está em choque!`,
+      `O(a) FDP ${name} venceu! Mas será que vai pagar a rodada?`,
+      `O(a) FDP ${name} venceu! Pode zoar à vontade!`,
+      `O(a) FDP ${name} venceu! O chat exige explicações!`,
+      `O(a) FDP ${name} venceu! O VAR está revisando...`
+    ];
+    return phrases[Math.floor(Math.random() * phrases.length)];
+  }
+
+  // Scroll para topo ao terminar o jogo
+  useEffect(() => {
+    if (state.gameState === GAME_STATES.GAME_OVER) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [state.gameState]);
+
+  // Função para frase engraçada
+  function getFunnyPhrase(name) {
+    const phrases = [
+      `Parabéns, ${name}! Agora você é oficialmente o FDP supremo!`,
+      `${name}, ganhou... mas será que jogou limpo? 🤔`,
+      `O resto só assiste enquanto ${name} humilha geral!`,
+      `FDP detectado: ${name}. Preparem-se para a revanche!`,
+      `Se fosse pra perder, eu nem vinha... né, ${name}?`,
+      `A lenda do FDP: ${name}. O chat está em choque!`,
+      `O(a) FDP ${name} venceu! Mas será que vai pagar a rodada?`,
+      `O(a) FDP ${name} venceu! Pode zoar à vontade!`,
+      `O(a) FDP ${name} venceu! O chat exige explicações!`,
+      `O(a) FDP ${name} venceu! O VAR está revisando...`
+    ];
+    return phrases[Math.floor(Math.random() * phrases.length)];
+  }
 }
 
 export default GameBoard;

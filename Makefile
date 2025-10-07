@@ -77,9 +77,8 @@ endef
 # ------------------------------------
 # Tarefas principais
 # ------------------------------------
-.PHONY: help install dev build preview start run lint lint-fix format typecheck clean clean-node clean-all check check-env open show-pm show-env \
-	port-check port-kill port-who docker-dev docker-preview ci analyze deps-audit deps-outdated env serve print-% \
-	git-init git-status git-check git-config-check git-hooks-install git-hooks-uninstall
+.PHONY: help install dev build preview start run run-dev run-prod lint lint-fix format typecheck clean clean-node clean-all check check-env open show-pm show-env \
+	port-check port-kill port-who docker-dev docker-preview ci analyze deps-audit deps-outdated env serve print-% is-git require-git git-init git-status git-branch git-check git-hooks git-hooks-install git-hooks-uninstall version-bump changelog release pre-commit
 
 help: ## Mostra esta ajuda (targets e descrições)
 	@awk 'BEGIN {FS = ":.*##"; printf "\nComandos disponíveis:\n\n"} \
@@ -106,7 +105,13 @@ preview: check-env ## Preview do build de produção (Vite)
 	$(RUN) preview -- --host $(HOST) --port $(PORT)
 
 start: preview ## Alias para preview
-run: dev ## Alias para dev (executa o servidor de desenvolvimento)
+run: install run-dev ## Executa fluxo de desenvolvimento (install + dev)
+
+run-dev: dev ## Alias explícito para desenvolvimento
+
+run-prod: ## Build + preview em modo produção
+	$(MAKE) build
+	$(MAKE) preview
 analyze: ## Analisa o bundle (gera e abre relatório em dist/stats.html)
 	@if grep -q '"analyze"' package.json; then \
 	  $(RUN) analyze; \
@@ -141,6 +146,96 @@ env: ## Mostra versões de Node, PM e Vite
 
 serve: ## Build + preview usando script do package.json
 	$(RUN) serve
+
+## ------------------------------------
+## Integração com Git
+## ------------------------------------
+IS_GIT := $(shell test -d .git && echo 1 || echo 0)
+
+is-git: ## Indica se o diretório atual é um repositório Git
+	@if [ "$(IS_GIT)" = "1" ]; then echo yes; else echo no; fi
+
+require-git: ## Falha se não estiver em um repositório Git
+	@if [ "$(IS_GIT)" != "1" ]; then \
+	  $(call _err,Repositório Git não encontrado. Rode `make git-init` ou inicialize com `git init`); \
+	  exit 1; \
+	fi
+
+git-init: ## Inicializa repositório Git (branch $(MAIN_BRANCH)) e commit inicial opcional
+	@if [ "$(IS_GIT)" != "1" ]; then \
+	  git init; \
+	  if git rev-parse --abbrev-ref HEAD >/dev/null 2>&1; then :; else git checkout -b $(MAIN_BRANCH); fi; \
+	  $(call _ok,Git inicializado na branch $(MAIN_BRANCH)); \
+	else \
+	  $(call _warn,Repositório Git já inicializado); \
+	fi; \
+	if git diff --quiet && git diff --cached --quiet; then \
+	  $(call _warn,Nada para commitar no momento); \
+	else \
+	  git add -A && git commit -m "chore: initial commit" || true; \
+	fi
+
+git-status: require-git ## Mostra status resumido do repositório
+	@git status -sb
+
+git-branch: require-git ## Mostra a branch atual
+	@git rev-parse --abbrev-ref HEAD
+
+git-check: require-git ## Falha se houver alterações não commitadas
+	@git diff --quiet && git diff --cached --quiet || { $(call _err,Working tree sujo. Faça commit/stash antes.); exit 1; }
+
+git-config-check: require-git ## Verifica user.name e user.email no git config
+	@name=$$(git config --get user.name || true); email=$$(git config --get user.email || true); \
+	if [ -z "$$name" ] || [ -z "$$email" ]; then \
+	  $(call _warn,Git user.name/email não configurados); \
+	  echo "Configure com: git config --global user.name 'Seu Nome' && git config --global user.email 'voce@exemplo.com'"; \
+	else \
+	  $(call _ok,Git configurado: $$name <$$email>); \
+	fi
+
+git-hooks: git-hooks-install ## Configura hooks a partir de scripts/git-hooks
+
+git-hooks-install: require-git ## Configura core.hooksPath para scripts/git-hooks
+	@if [ -d scripts/git-hooks ]; then \
+	  chmod +x scripts/git-hooks/* || true; \
+	  git config core.hooksPath scripts/git-hooks; \
+	  $(call _ok,Hooks configurados (core.hooksPath -> scripts/git-hooks)); \
+	else \
+	  $(call _warn,Diretório scripts/git-hooks não encontrado); \
+	fi
+
+git-hooks-uninstall: require-git ## Remove configuração de hooks personalizados
+	@git config --unset core.hooksPath || true
+	$(call _ok,Hooks personalizados desativados)
+
+PART ?= patch
+version-bump: require-git ## Sobe versão (PART=patch|minor|major) e cria tag
+	@if [ "$(PART)" != "patch" ] && [ "$(PART)" != "minor" ] && [ "$(PART)" != "major" ]; then \
+	  $(call _err,PART inválido: $(PART) (use patch|minor|major)); exit 2; \
+	fi
+	@if [ "$(PKG_MGR)" = "npm" ]; then \
+	  npm version $(PART) -m "chore(release): v%s"; \
+	elif [ "$(PKG_MGR)" = "pnpm" ]; then \
+	  pnpm version $(PART) -m "chore(release): v%s"; \
+	else \
+	  yarn version --$(PART); \
+	fi
+	$(call _ok,Versão atualizada e tag criada)
+
+changelog: ## Gera/atualiza CHANGELOG.md usando conventional-changelog (se disponível)
+	@$(EXEC) conventional-changelog -p angular -i CHANGELOG.md -s || { $(call _warn,conventional-changelog não disponível; pulei); true; }
+
+release: version-bump ## Realiza release: bump + push tags (se remoto configurado)
+	@if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then \
+	  git push --follow-tags; \
+	  $(call _ok,Release enviado ao remoto); \
+	else \
+	  $(call _warn,Nenhum remoto configurado; commit/tag locais apenas); \
+	fi
+
+pre-commit: ## Execuções rápidas antes de commit (rodado localmente)
+	$(MAKE) lint
+	$(MAKE) format
 
 print-%: ## Debug: imprime o valor da variável (% é o nome)
 	@echo $* = $($*)
@@ -264,59 +359,6 @@ docker-preview: ## Build + preview servidos via container (Node 20 Alpine)
 	  -e CI=$(CI) \
 	  -v "$$PWD":/app -w /app node:20-alpine \
 	  sh -ceu '$(INSTALL_CMD); npm run build; npm run preview -- --host 0.0.0.0 --port 4173'
-
-# ------------------------------------
-# Git workflow helpers
-# ------------------------------------
-git-init: ## Inicializa repositório git (branch $(MAIN_BRANCH)) e cria commit inicial
-	@if [ ! -d .git ]; then \
-	  $(GIT) init; \
-	  if $(GIT) rev-parse --abbrev-ref HEAD >/dev/null 2>&1; then :; else $(GIT) checkout -b $(MAIN_BRANCH); fi; \
-	  $(GIT) add -A; \
-	  if $(GIT) diff --cached --quiet; then \
-	    $(call _warn,Nada para commitar no momento); \
-	  else \
-	    $(GIT) commit -m "chore: initial commit"; \
-	  fi; \
-	  $(call _ok,Repositório git inicializado); \
-	else \
-	  $(call _warn,Repositório git já existe); \
-	fi
-
-git-config-check: ## Verifica user.name e user.email no git config
-	@name=$$($(GIT) config --get user.name || true); email=$$($(GIT) config --get user.email || true); \
-	if [ -z "$$name" ] || [ -z "$$email" ]; then \
-	  $(call _warn,Git user.name/email não configurados); \
-	  echo "Configure com: git config --global user.name 'Seu Nome' && git config --global user.email 'voce@exemplo.com'"; \
-	else \
-	  $(call _ok,Git configurado: $$name <$$email>); \
-	fi
-
-git-status: ## Mostra status resumido (branch, staged/unstaged)
-	@$(GIT) status -sb || $(GIT) status
-
-git-check: ## Garante working tree limpo e branch esperado ($(MAIN_BRANCH))
-	@if ! $(GIT) diff --quiet || ! $(GIT) diff --cached --quiet; then \
-	  $(call _err,Working tree sujo. Faça commit ou stash.); exit 1; \
-	fi
-	@branch=$$($(GIT) rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown); \
-	if [ "$$branch" != "$(MAIN_BRANCH)" ]; then \
-	  $(call _warn,Branch atual é $$branch, esperado $(MAIN_BRANCH)); \
-	else \
-	  $(call _ok,Branch correto: $(MAIN_BRANCH)); \
-	fi
-
-git-hooks-install: ## Instala hooks de git locais (pre-commit, commit-msg)
-	@if [ ! -d .git ]; then $(call _err,Repo git inexistente. Rode `make git-init` primeiro.); exit 1; fi
-	@mkdir -p $(GIT_HOOKS_DIR)
-	@cp -f $(HOOKS_SRC_DIR)/pre-commit $(GIT_HOOKS_DIR)/pre-commit
-	@cp -f $(HOOKS_SRC_DIR)/commit-msg $(GIT_HOOKS_DIR)/commit-msg
-	@chmod +x $(GIT_HOOKS_DIR)/pre-commit $(GIT_HOOKS_DIR)/commit-msg
-	$(call _ok,Git hooks instalados)
-
-git-hooks-uninstall: ## Remove hooks instalados
-	@rm -f $(GIT_HOOKS_DIR)/pre-commit $(GIT_HOOKS_DIR)/commit-msg || true
-	$(call _ok,Git hooks removidos)
 
 # -----------------------------------------------------------------------------
 # FIM

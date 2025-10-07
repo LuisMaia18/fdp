@@ -221,7 +221,7 @@ export function useDeviceDetection() {
 /**
  * Hook para gerenciar timeout/interval
  */
-export function useTimer(callback, delay, immediate = false) {
+export function useTimer(callback, delay /*, immediate = false */) {
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [timeLeft, setTimeLeft] = useState(delay);

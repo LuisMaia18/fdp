@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../contexts/GameContext';
 import './Lobby.css';
+import Mascot from './Mascot';
 
 function Lobby() {
   const { state, actions, GAME_STATES } = useGame();
@@ -27,11 +28,11 @@ function Lobby() {
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(playerName)}&background=random`
     };
 
-    actions.setRoomCode(roomCode);
-    actions.setIsHost(true);
-    actions.setCurrentPlayer(player);
-    actions.addPlayer(player);
-    actions.setGameState(GAME_STATES.WAITING_FOR_PLAYERS);
+  actions.setIsHost(true);
+  actions.setCurrentPlayer(player);
+  actions.addPlayer(player);
+  actions.setRoomCode(roomCode);
+  actions.setGameState(GAME_STATES.WAITING_FOR_PLAYERS);
     actions.setError(null);
   };
 
@@ -54,11 +55,11 @@ function Lobby() {
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(playerName)}&background=random`
     };
 
-    actions.setRoomCode(joinRoomCode.toUpperCase());
-    actions.setIsHost(false);
-    actions.setCurrentPlayer(player);
-    actions.addPlayer(player);
-    actions.setGameState(GAME_STATES.WAITING_FOR_PLAYERS);
+  actions.setIsHost(false);
+  actions.setCurrentPlayer(player);
+  actions.addPlayer(player);
+  actions.setRoomCode(joinRoomCode.toUpperCase());
+  actions.setGameState(GAME_STATES.WAITING_FOR_PLAYERS);
     actions.setError(null);
   };
 
@@ -79,6 +80,7 @@ function Lobby() {
       <div className="lobby-container">
         {/* Header */}
         <div className="lobby-header">
+          <Mascot variant="hero" size={120} speech="Bora jogar?" className="mascot-hero" />
           <h1 className="game-title">
             <span className="title-main">Foi De Propósito</span>
             <span className="title-subtitle">O jogo mais FDP que existe!</span>
