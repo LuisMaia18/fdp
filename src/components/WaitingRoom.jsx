@@ -9,6 +9,14 @@ function WaitingRoom() {
   const [showConfig, setShowConfig] = useState(false);
   // Preferência local do host para ocultar o código para si também
   const [hideForMe, setHideForMe] = useState(false);
+  
+  // ⚠️ CORREÇÃO AUTOMÁTICA: Se não há jogadores mas há um currentPlayer host, adicione-o
+  useEffect(() => {
+    if (state.players.length === 0 && state.currentPlayer && state.isHost) {
+      actions.addPlayer(state.currentPlayer);
+    }
+  }, [state.players.length, state.currentPlayer, state.isHost, actions]);
+  
   // Quando o host ativa/desativa o Stream Mode, por padrão ocultamos/mostramos para ele também
   useEffect(() => {
     if (state.isHost) {
@@ -131,19 +139,21 @@ function WaitingRoom() {
             <div className="player-count">
               {state.players.length}/{state.gameConfig.maxPlayers} jogadores
             </div>
-            {state.streamMode && (
-              <div
-                className="stream-mode-badge"
-                title={state.isHost
-                  ? 'Stream Mode ativo: o código está visível para você e oculto para os demais jogadores.'
-                  : 'Stream Mode ativo: o host ocultou o código da sala.'}
-                aria-label="Stream Mode ativo"
-              >
-                <span className="badge-icon" aria-hidden>🙈</span>
-                {state.isHost ? 'Stream Mode ativo' : 'Código oculto pelo host'}
-              </div>
-            )}
           </div>
+          
+          {/* Stream Mode Badge - Apenas UMA instância */}
+          {state.streamMode && (
+            <div
+              className="stream-mode-badge"
+              title={state.isHost
+                ? 'Stream Mode ativo: o código está visível para você e oculto para os demais jogadores.'
+                : 'Stream Mode ativo: o host ocultou o código da sala.'}
+              aria-label="Stream Mode ativo"
+            >
+              <span className="badge-icon" aria-hidden>🙈</span>
+              {state.isHost ? 'Stream Mode ativo' : 'Código oculto pelo host'}
+            </div>
+          )}
         </div>
 
         {/* Players Grid */}

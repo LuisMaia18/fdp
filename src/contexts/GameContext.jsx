@@ -144,15 +144,28 @@ function gameReducer(state, action) {
     }
       
     case ACTIONS.SET_GAME_STATE: {
+      const newState = action.payload;
+      
+      // Verificação de integridade: se estamos entrando no estado PLAYING, garante que há um FDP
+      if (newState === GAME_STATES.PLAYING && !state.currentFDP && state.players.length > 0) {
+        console.warn('SET_GAME_STATE: Tentando entrar em PLAYING sem FDP. Definindo FDP automaticamente.');
+        const firstPlayer = state.players[0];
+        return {
+          ...state,
+          gameState: newState,
+          currentFDP: firstPlayer.id
+        };
+      }
+      
       return {
         ...state,
-        gameState: action.payload
+        gameState: newState
       };
     }
       
     case ACTIONS.ADD_PLAYER: {
       const newPlayer = action.payload;
-      return {
+      const newState = {
         ...state,
         players: [...state.players, newPlayer],
         scores: {
@@ -160,6 +173,8 @@ function gameReducer(state, action) {
           [newPlayer.id]: 0
         }
       };
+      
+      return newState;
     }
       
     case ACTIONS.REMOVE_PLAYER: {
@@ -281,24 +296,32 @@ function gameReducer(state, action) {
     }
       
     case ACTIONS.NEXT_ROUND: {
-      // Reabastece as mãos dos jogadores
+      // Reabastece apenas 1 carta para cada jogador que jogou (exceto o FDP)
       const playersToRefill = state.players.filter(p => p.id !== state.currentFDP);
       const newPlayerHands = { ...state.playerHands };
       let cardsUsed = 0;
       
+      // Verifica se há cartas suficientes para continuar o jogo
+      const playersWhoPlayed = playersToRefill.filter(p => state.submittedAnswers[p.id]);
+      if (state.remainingAnswerCards.length < playersWhoPlayed.length) {
+        console.log('NEXT_ROUND: Cartas insuficientes para continuar. Terminando jogo.');
+        return {
+          ...state,
+          gameState: GAME_STATES.GAME_OVER
+        };
+      }
+      
       playersToRefill.forEach(player => {
         // Garante estrutura existente
         if (!Array.isArray(newPlayerHands[player.id])) newPlayerHands[player.id] = [];
-        const currentHandSize = newPlayerHands[player.id].length;
-        const cardsNeeded = state.gameConfig.cardsPerPlayer - currentHandSize;
         
-        if (cardsNeeded > 0) {
-          const startIndex = cardsUsed;
-          const endIndex = startIndex + cardsNeeded;
-          const newCards = state.remainingAnswerCards.slice(startIndex, endIndex);
-          
-          newPlayerHands[player.id] = [...newPlayerHands[player.id], ...newCards];
-          cardsUsed += cardsNeeded;
+        // Adiciona apenas 1 carta se o jogador jogou uma carta na rodada anterior
+        if (state.submittedAnswers[player.id]) {
+          const newCard = state.remainingAnswerCards[cardsUsed];
+          if (newCard) {
+            newPlayerHands[player.id] = [...newPlayerHands[player.id], newCard];
+            cardsUsed += 1;
+          }
         }
       });
       
@@ -306,6 +329,8 @@ function gameReducer(state, action) {
       const currentFDPIndex = state.players.findIndex(p => p.id === state.currentFDP);
       const nextFDPIndex = (currentFDPIndex + 1) % state.players.length;
       const nextFDP = state.players[nextFDPIndex].id;
+      
+      console.log('NEXT_ROUND: FDP atual:', state.currentFDP, 'Próximo FDP:', nextFDP, 'Jogador:', state.players[nextFDPIndex].name);
       
       return {
         ...state,
@@ -322,7 +347,18 @@ function gameReducer(state, action) {
     case ACTIONS.START_GAME: {
       // Embaralha a ordem dos jogadores e escolhe o primeiro FDP
       const shuffledPlayers = shuffleArray(state.players);
-      const firstFDP = shuffledPlayers[0].id;
+      const firstFDP = shuffledPlayers[0]?.id;
+      
+      console.log('START_GAME: Iniciando jogo');
+      console.log('- Jogadores antes do embaralhamento:', state.players.map(p => ({ id: p.id, name: p.name })));
+      console.log('- Jogadores após embaralhamento:', shuffledPlayers.map(p => ({ id: p.id, name: p.name })));
+      console.log('- Primeiro FDP escolhido:', firstFDP);
+      console.log('- Nome do FDP:', shuffledPlayers[0]?.name);
+      
+      if (!firstFDP) {
+        console.error('ERRO: Não foi possível escolher FDP - array de jogadores vazio!');
+        return state; // Retorna estado atual sem modificações
+      }
       
       return {
         ...state,
@@ -519,6 +555,30 @@ export function GameProvider({ children }) {
     return () => clearTimeout(timer);
   }, [state.timeRemaining, handleTimerEnd]);
   
+  // Verificação de integridade do jogo
+  useEffect(() => {
+    if (state.gameState === GAME_STATES.PLAYING) {
+      // Verifica se há um FDP definido
+      if (!state.currentFDP) {
+        console.error('INTEGRIDADE: Jogo em andamento sem FDP definido!');
+        if (state.isHost && state.players.length > 0) {
+          console.log('INTEGRIDADE: Host corrigindo - definindo primeiro jogador como FDP');
+          dispatch({ type: ACTIONS.SET_CURRENT_FDP, payload: state.players[0].id });
+        }
+      }
+      
+      // Verifica se o FDP existe na lista de jogadores
+      const fdpExists = state.players.some(p => p.id === state.currentFDP);
+      if (state.currentFDP && !fdpExists) {
+        console.error('INTEGRIDADE: FDP atual não existe na lista de jogadores!');
+        if (state.isHost && state.players.length > 0) {
+          console.log('INTEGRIDADE: Host corrigindo - redefinindo FDP');
+          dispatch({ type: ACTIONS.SET_CURRENT_FDP, payload: state.players[0].id });
+        }
+      }
+    }
+  }, [state.gameState, state.currentFDP, state.players, state.isHost]);
+  
   // Funções auxiliares
   // ---------------------------------
   const postMessageBC = (type, payload) => {
@@ -690,12 +750,17 @@ export function GameProvider({ children }) {
     
     // Jogadores
     addPlayer: (player) => {
+      console.log('🔧 DEBUG addPlayer: Tentando adicionar player:', player);
+      console.log('🔧 DEBUG addPlayer: Estado atual players:', state.players.length);
+      
       // Impede que não-host adicionem bots de teste
       if (player?.isBot && !state.isHost) {
         dispatch({ type: ACTIONS.SET_ERROR, payload: 'Somente o host pode adicionar bots.' });
         return;
       }
+      
       dispatch({ type: ACTIONS.ADD_PLAYER, payload: player });
+      
       // broadcast presença
       postMessageBC('PLAYER_JOIN', player);
     },
@@ -720,15 +785,41 @@ export function GameProvider({ children }) {
         dispatch({ type: ACTIONS.SET_ERROR, payload: 'Somente o host pode iniciar o jogo.' });
         return;
       }
-      dispatch({ type: ACTIONS.DEAL_CARDS });
-      dispatch({ type: ACTIONS.START_GAME });
-      dispatch({ type: ACTIONS.SET_QUESTION_CARD });
-      dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: state.gameConfig.roundTimer });
-      // Host envia snapshot para sincronizar clientes
-      if (state.isHost) {
-        // Pequeno atraso para garantir que todas as mutações estejam aplicadas
-        setTimeout(() => sendSnapshot(), 10);
+      
+      if (state.players.length < state.gameConfig.minPlayers) {
+        dispatch({ type: ACTIONS.SET_ERROR, payload: `Mínimo de ${state.gameConfig.minPlayers} jogadores necessário.` });
+        return;
       }
+      
+      console.log('====== INICIANDO JOGO ======');
+      console.log('startGame: Jogadores disponíveis:', state.players.map(p => ({ id: p.id, name: p.name })));
+      console.log('startGame: Total de jogadores:', state.players.length);
+      
+      // Primeiro distribui as cartas
+      console.log('startGame: Distribuindo cartas...');
+      dispatch({ type: ACTIONS.DEAL_CARDS });
+      
+      // Depois inicia o jogo (define FDP e estado)
+      console.log('startGame: Iniciando jogo e definindo FDP...');
+      dispatch({ type: ACTIONS.START_GAME });
+      
+      // Define a primeira carta de pergunta
+      console.log('startGame: Definindo carta de pergunta...');
+      dispatch({ type: ACTIONS.SET_QUESTION_CARD });
+      
+      // Inicia o timer
+      console.log('startGame: Iniciando timer...');
+      dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: state.gameConfig.roundTimer });
+      
+      console.log('====== FIM DA INICIALIZAÇÃO ======');
+      
+      // Host envia snapshot para sincronizar clientes
+      setTimeout(() => {
+        if (state.isHost) {
+          console.log('startGame: Enviando snapshot para clientes...');
+          sendSnapshot();
+        }
+      }, 100);
     },
     
     submitAnswer: (answerCard) => {

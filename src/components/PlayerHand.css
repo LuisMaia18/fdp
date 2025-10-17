@@ -2,6 +2,9 @@
 .player-hand {
   width: 100%;
   margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .hand-header {
@@ -41,13 +44,18 @@
 
 .cards-container {
   margin-bottom: 25px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 25px auto;
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
   padding: 0;
+  justify-items: center;
+  width: 100%;
 }
 
 .answer-card {
@@ -56,13 +64,14 @@
   border-radius: 15px;
   padding: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
   min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .answer-card::before {
@@ -74,29 +83,49 @@
   height: 4px;
   background: linear-gradient(45deg, #667eea, #764ba2);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
+  border-radius: 15px 15px 0 0;
 }
 
 .answer-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15);
+  border-color: #a0a9ea;
+  background: #fafbff;
 }
 
 .answer-card:hover::before {
-  opacity: 1;
+  opacity: 0;
 }
 
 .answer-card.selected {
   border-color: #28a745;
-  background: linear-gradient(135deg, #d4edda 0%, #ffffff 50%);
-  transform: translateY(-8px);
-  box-shadow: 0 15px 35px rgba(40, 167, 69, 0.3);
+  background: linear-gradient(135deg, #d4edda 0%, #f8fff8 50%, #ffffff 100%);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 25px rgba(40, 167, 69, 0.3);
+  border-width: 4px;
+  animation: selected-glow 2s ease-in-out infinite;
 }
 
 .answer-card.selected::before {
   background: linear-gradient(45deg, #28a745, #20c997);
   opacity: 1;
+  border-radius: 15px 15px 0 0;
+  height: 6px;
+}
+
+.answer-card.selected .card-text {
+  color: #155724;
+  font-weight: 600;
+}
+
+@keyframes selected-glow {
+  0%, 100% {
+    box-shadow: 0 12px 25px rgba(40, 167, 69, 0.3);
+  }
+  50% {
+    box-shadow: 0 12px 25px rgba(40, 167, 69, 0.5), 0 0 20px rgba(40, 167, 69, 0.3);
+  }
 }
 
 .card-content {
@@ -106,58 +135,64 @@
 }
 
 .card-text {
-  color: #333;
+  color: #2c3e50;
   font-size: 1.1rem;
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
+  text-align: center;
 }
 
 .selection-indicator {
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: 10px;
+  right: 10px;
   background: #28a745;
   color: white;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  animation: checkBounce 0.3s ease;
+  animation: checkBounce 0.4s ease;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  border: 3px solid white;
 }
 
 .check-icon {
-  font-size: 1.2rem;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .selected-card-preview {
-  background: rgba(255, 255, 255, 0.95);
+  margin-top: 25px;
+  padding: 20px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
   border-radius: 15px;
-  padding: 25px;
+  border: 3px solid #2196f3;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.2);
 }
 
 .selected-card-preview h4 {
-  color: #333;
-  font-size: 1.3rem;
+  color: #1565c0;
+  font-size: 1.2rem;
   margin-bottom: 15px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .preview-card {
-  background: linear-gradient(135d, #28a745 0%, #20c997 100%);
-  color: white;
+  background: white;
   padding: 20px;
   border-radius: 12px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1.4;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  font-size: 1.1rem;
+  color: #1565c0;
+  font-weight: 600;
+  border: 2px solid #2196f3;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+  margin: 0 auto;
+  max-width: 400px;
 }
 
 /* Animations */
@@ -179,17 +214,21 @@
 @keyframes cardSelect {
   0% {
     transform: translateY(0) scale(1);
+    border-width: 3px;
   }
   50% {
-    transform: translateY(-10px) scale(1.02);
+    transform: translateY(-8px) scale(1.03);
+    border-width: 4px;
   }
   100% {
-    transform: translateY(-8px) scale(1);
+    transform: translateY(-6px) scale(1);
+    border-width: 4px;
   }
 }
 
-.answer-card.selected {
-  animation: cardSelect 0.4s ease;
+/* Animation trigger class - will be added via JavaScript */
+.answer-card.selecting {
+  animation: cardSelect 0.5s ease;
 }
 
 /* Touch improvements for mobile */

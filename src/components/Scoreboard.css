@@ -10,52 +10,83 @@
 
 /* Compact version for final winner screen */
 .expanded-scoreboard-wrapper .scoreboard {
-  padding: 8px 4px;
+  padding: 16px 12px;
   max-width: 100%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid rgba(118, 75, 162, 0.1);
+  border-radius: 16px;
+}
+
+/* Stats only component styling */
+.scoreboard.stats-only {
+  padding: 16px 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid rgba(118, 75, 162, 0.1);
+  max-width: 100%;
+  border-radius: 16px;
+}
+
+.scoreboard.stats-only .game-stats {
+  margin-top: 0;
+  padding: 0;
+  border-top: none;
+  background: none;
+  border-radius: 0;
+  border: none;
 }
 
 .expanded-scoreboard-wrapper .scoreboard-header {
-  margin-bottom: 6px;
-  padding-bottom: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(118, 75, 162, 0.1);
 }
 
 .expanded-scoreboard-wrapper .scoreboard-header h2 {
-  font-size: 1.05rem;
-  margin-bottom: 2px;
-}
-
-.expanded-scoreboard-wrapper .winning-score {
-  font-size: 0.85rem;
-}
-
-.expanded-scoreboard-wrapper .players-ranking {
-  gap: 4px;
+  font-size: 1.4rem;
   margin-bottom: 6px;
-}
-
-.expanded-scoreboard-wrapper .player-rank {
-  padding: 6px 6px;
-  gap: 6px;
-  border-width: 1.5px;
-}
-
-.expanded-scoreboard-wrapper .player-avatar {
-  width: 22px;
-  height: 22px;
-}
-
-.expanded-scoreboard-wrapper .player-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.expanded-scoreboard-wrapper .score-number {
-  font-size: 0.95rem;
+  color: #2c3e50;
   font-weight: 700;
 }
 
+.expanded-scoreboard-wrapper .winning-score {
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.expanded-scoreboard-wrapper .players-ranking {
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.expanded-scoreboard-wrapper .player-rank {
+  padding: 12px 16px;
+  gap: 12px;
+  border-width: 2px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.expanded-scoreboard-wrapper .player-avatar {
+  width: 35px;
+  height: 35px;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.expanded-scoreboard-wrapper .player-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.expanded-scoreboard-wrapper .score-number {
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
 .expanded-scoreboard-wrapper .score-label {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .scoreboard-header {
@@ -341,6 +372,14 @@
   border-top: 2px solid rgba(102, 126, 234, 0.1);
 }
 
+.expanded-scoreboard-wrapper .game-stats {
+  margin-top: 20px;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(118, 75, 162, 0.1);
+}
+
 .game-stats h3 {
   color: #333;
   font-size: 1.4rem;
@@ -349,10 +388,23 @@
   text-align: center;
 }
 
+.expanded-scoreboard-wrapper .game-stats h3 {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 15px;
+}
+
+.expanded-scoreboard-wrapper .stats-grid {
+  gap: 8px;
+  margin: 0;
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .stat-item {
@@ -360,6 +412,14 @@
   background: rgba(102, 126, 234, 0.05);
   padding: 20px 15px;
   border-radius: 12px;
+}
+
+.expanded-scoreboard-wrapper .stat-item {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(118, 75, 162, 0.1);
+  box-shadow: 0 2px 6px rgba(118, 75, 162, 0.1);
 }
 
 .stat-value {
@@ -370,12 +430,27 @@
   margin-bottom: 8px;
 }
 
+.expanded-scoreboard-wrapper .stat-value {
+  font-size: 2.2rem;
+  color: #764ba2;
+  margin-bottom: 6px;
+  font-weight: 900;
+}
+
 .stat-label {
   color: #666;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
+}
+
+.expanded-scoreboard-wrapper .stat-label {
+  color: #2c3e50;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Animations */

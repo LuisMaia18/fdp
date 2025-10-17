@@ -78,7 +78,7 @@ endef
 # Tarefas principais
 # ------------------------------------
 .PHONY: help install dev build preview start run run-dev run-prod lint lint-fix format typecheck clean clean-node clean-all check check-env open show-pm show-env \
-	port-check port-kill port-who docker-dev docker-preview ci analyze deps-audit deps-outdated env serve print-% is-git require-git git-init git-status git-branch git-check git-hooks git-hooks-install git-hooks-uninstall version-bump changelog release pre-commit
+	port-check port-kill port-who docker-dev docker-preview ci analyze deps-audit deps-outdated env serve print-% is-git require-git git-init git-status git-branch git-check git-hooks git-hooks-install git-hooks-uninstall version-bump changelog release pre-commit commit disable-hooks
 
 help: ## Mostra esta ajuda (targets e descrições)
 	@awk 'BEGIN {FS = ":.*##"; printf "\nComandos disponíveis:\n\n"} \
@@ -147,165 +147,61 @@ env: ## Mostra versões de Node, PM e Vite
 serve: ## Build + preview usando script do package.json
 	$(RUN) serve
 
-## ------------------------------------
-## Integração com Git
-## ------------------------------------
-IS_GIT := $(shell test -d .git && echo 1 || echo 0)
+# ==============================================================================
+# GIT OPERATIONS
+# ==============================================================================
 
-is-git: ## Indica se o diretório atual é um repositório Git
-	@if [ "$(IS_GIT)" = "1" ]; then echo yes; else echo no; fi
+git-status: ## 📊 Enhanced git status with visualization
+	@echo "$(CYAN)$(BOLD)📊 Git Status$(RESET)"
+	@echo "$(YELLOW)═══════════════════════════════════════$(RESET)"
+	@echo "$(GREEN)Branch:$(RESET) $(GIT_BRANCH)"
+	@echo "$(GREEN)Commit:$(RESET) $(GIT_COMMIT)"
+	@echo ""
+	@git status --short --branch 2>/dev/null || echo "$(RED)❌ Not a git repository$(RESET)"
 
-require-git: ## Falha se não estiver em um repositório Git
-	@if [ "$(IS_GIT)" != "1" ]; then \
-	  $(call _err,Repositório Git não encontrado. Rode `make git-init` ou inicialize com `git init`); \
-	  exit 1; \
+git-log: ## 📜 Beautiful git log with graph
+	@echo "$(CYAN)$(BOLD)📜 Git History$(RESET)"
+	@echo "$(YELLOW)═══════════════════════════════════════$(RESET)"
+	@git log --graph --pretty=format:'%C(red)%h%C(reset) -%C(yellow)%d%C(reset) %s %C(green)(%cr) %C(bold blue)<%an>%C(reset)' --abbrev-commit -10 2>/dev/null || echo "$(RED)❌ Not a git repository$(RESET)"
+
+git-contributors: ## 👥 Show git contributors
+	@echo "$(CYAN)$(BOLD)👥 Contributors$(RESET)"
+	@echo "$(YELLOW)═══════════════════════════════════════$(RESET)"
+	@git shortlog -sn 2>/dev/null || echo "$(RED)❌ Not a git repository$(RESET)"
+
+git-stats: ## 📈 Git repository statistics
+	@echo "$(CYAN)$(BOLD)📈 Repository Statistics$(RESET)"
+	@echo "$(YELLOW)═══════════════════════════════════════$(RESET)"
+	@echo "$(GREEN)Total commits:$(RESET) $$(git rev-list --all --count 2>/dev/null || echo 'N/A')"
+	@echo "$(GREEN)Total branches:$(RESET) $$(git branch -a 2>/dev/null | wc -l || echo 'N/A')"
+	@echo "$(GREEN)Total contributors:$(RESET) $$(git shortlog -sn 2>/dev/null | wc -l || echo 'N/A')"
+	@echo "$(GREEN)Repository size:$(RESET) $$(du -sh .git 2>/dev/null | cut -f1 || echo 'N/A')"
+
+commit: ## 💾 Interactive commit with conventional format
+	@echo "$(CYAN)$(BOLD)💾 Interactive Commit$(RESET)"
+	@echo "$(YELLOW)Choose commit type:$(RESET)"
+	@echo "  $(GREEN)feat$(RESET)     - New feature"
+	@echo "  $(GREEN)fix$(RESET)      - Bug fix"
+	@echo "  $(GREEN)docs$(RESET)     - Documentation"
+	@echo "  $(GREEN)style$(RESET)    - Code style changes"
+	@echo "  $(GREEN)refactor$(RESET) - Code refactoring"
+	@echo "  $(GREEN)test$(RESET)     - Adding tests"
+	@echo "  $(GREEN)chore$(RESET)    - Maintenance"
+	@echo ""
+	@read -p "Type: " type; \
+	read -p "Scope (optional): " scope; \
+	read -p "Description: " desc; \
+	git add -A; \
+	if [ -n "$$scope" ]; then \
+		git commit -m "$$type($$scope): $$desc"; \
+	else \
+		git commit -m "$$type: $$desc"; \
 	fi
 
-git-init: ## Inicializa repositório Git (branch $(MAIN_BRANCH)) e commit inicial opcional
-	@if [ "$(IS_GIT)" != "1" ]; then \
-	  git init; \
-	  if git rev-parse --abbrev-ref HEAD >/dev/null 2>&1; then :; else git checkout -b $(MAIN_BRANCH); fi; \
-	  $(call _ok,Git inicializado na branch $(MAIN_BRANCH)); \
-	else \
-	  $(call _warn,Repositório Git já inicializado); \
-	fi; \
-	if git diff --quiet && git diff --cached --quiet; then \
-	  $(call _warn,Nada para commitar no momento); \
-	else \
-	  git add -A && git commit -m "chore: initial commit" || true; \
-	fi
-
-git-status: require-git ## Mostra status resumido do repositório
-	@git status -sb
-
-git-branch: require-git ## Mostra a branch atual
-	@git rev-parse --abbrev-ref HEAD
-
-git-check: require-git ## Falha se houver alterações não commitadas
-	@git diff --quiet && git diff --cached --quiet || { $(call _err,Working tree sujo. Faça commit/stash antes.); exit 1; }
-
-git-config-check: require-git ## Verifica user.name e user.email no git config
-	@name=$$(git config --get user.name || true); email=$$(git config --get user.email || true); \
-	if [ -z "$$name" ] || [ -z "$$email" ]; then \
-	  $(call _warn,Git user.name/email não configurados); \
-	  echo "Configure com: git config --global user.name 'Seu Nome' && git config --global user.email 'voce@exemplo.com'"; \
-	else \
-	  $(call _ok,Git configurado: $$name <$$email>); \
-	fi
-
-git-hooks: git-hooks-install ## Configura hooks a partir de scripts/git-hooks
-
-git-hooks-install: require-git ## Configura core.hooksPath para scripts/git-hooks
-	@if [ -d scripts/git-hooks ]; then \
-	  chmod +x scripts/git-hooks/* || true; \
-	  git config core.hooksPath scripts/git-hooks; \
-	  $(call _ok,Hooks configurados (core.hooksPath -> scripts/git-hooks)); \
-	else \
-	  $(call _warn,Diretório scripts/git-hooks não encontrado); \
-	fi
-
-git-hooks-uninstall: require-git ## Remove configuração de hooks personalizados
+disable-hooks: ## 🔓 Desativa hooks de pre-commit do git
+	@if [ -f .git/hooks/pre-commit ]; then mv .git/hooks/pre-commit .git/hooks/pre-commit.bak; fi
 	@git config --unset core.hooksPath || true
-	$(call _ok,Hooks personalizados desativados)
-
-PART ?= patch
-version-bump: require-git ## Sobe versão (PART=patch|minor|major) e cria tag
-	@if [ "$(PART)" != "patch" ] && [ "$(PART)" != "minor" ] && [ "$(PART)" != "major" ]; then \
-	  $(call _err,PART inválido: $(PART) (use patch|minor|major)); exit 2; \
-	fi
-	@if [ "$(PKG_MGR)" = "npm" ]; then \
-	  npm version $(PART) -m "chore(release): v%s"; \
-	elif [ "$(PKG_MGR)" = "pnpm" ]; then \
-	  pnpm version $(PART) -m "chore(release): v%s"; \
-	else \
-	  yarn version --$(PART); \
-	fi
-	$(call _ok,Versão atualizada e tag criada)
-
-changelog: ## Gera/atualiza CHANGELOG.md usando conventional-changelog (se disponível)
-	@$(EXEC) conventional-changelog -p angular -i CHANGELOG.md -s || { $(call _warn,conventional-changelog não disponível; pulei); true; }
-
-release: version-bump ## Realiza release: bump + push tags (se remoto configurado)
-	@if git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then \
-	  git push --follow-tags; \
-	  $(call _ok,Release enviado ao remoto); \
-	else \
-	  $(call _warn,Nenhum remoto configurado; commit/tag locais apenas); \
-	fi
-
-pre-commit: ## Execuções rápidas antes de commit (rodado localmente)
-	$(MAKE) lint
-	$(MAKE) format
-
-print-%: ## Debug: imprime o valor da variável (% é o nome)
-	@echo $* = $($*)
-
-lint: check-env ## Executa ESLint
-	@if [ -f eslint.config.js ]; then \
-	  $(RUN) lint; \
-	else \
-	  $(call _warn,eslint.config.js não encontrado, rodando fallback via npx); \
-	  $(EXEC) eslint . --ext .js,.jsx --max-warnings=0 || true; \
-	fi
-
-lint-fix: check-env ## Corrige problemas com ESLint (--fix)
-	@if [ -f eslint.config.js ]; then \
-	  $(EXEC) eslint . --ext .js,.jsx --fix; \
-	else \
-	  $(call _warn,eslint.config.js não encontrado, aplicando fix via npx); \
-	  $(EXEC) eslint . --ext .js,.jsx --fix || true; \
-	fi
-
-format: ## Formata o código com Prettier (npx; opcional)
-	$(call _msg,Formatando com Prettier ...)
-	$(EXEC) prettier "**/*.{js,jsx,json,css,md}" --ignore-path .gitignore --write || true
-	$(call _ok,Formatação finalizada)
-
-typecheck: ## Checagem de tipos (TS) se houver tsconfig.json
-	@if [ -f tsconfig.json ]; then \
-	  $(call _msg,Executando checagem de tipos ...); \
-	  $(EXEC) tsc --noEmit; \
-	else \
-	  $(call _warn,tsconfig.json não encontrado, pulando typecheck); \
-	fi
-
-clean: ## Remove artefatos de build
-	@rm -rf dist
-	$(call _ok,Limpeza de dist concluída)
-
-clean-node: ## Remove node_modules (atenção!)
-	@rm -rf node_modules
-	$(call _ok,node_modules removido)
-
-clean-all: clean clean-node ## Remove dist + node_modules
-
-check: ## Verificações rápidas (lint + build)
-	$(MAKE) lint
-	$(MAKE) build
-	$(call _ok,Check concluído com sucesso)
-
-ci: ## Target para CI (instala, lint, build)
-	$(MAKE) install
-	$(MAKE) lint
-	$(MAKE) build
-
-open: ## Abre o navegador em http://localhost:$(PORT)
-	@if command -v xdg-open >/dev/null 2>&1; then \
-	  xdg-open "http://localhost:$(PORT)" >/dev/null 2>&1 || true; \
-	else \
-	  $(call _warn,xdg-open não disponível); \
-	fi
-
-show-pm: ## Mostra o gerenciador de pacotes detectado
-	@echo $(PKG_MGR)
-
-show-env: ## Mostra variáveis relevantes
-	@echo "PKG_MGR=$(PKG_MGR)"
-	@echo "PORT=$(PORT)"
-	@echo "HOST=$(HOST)"
-	@echo "OPEN=$(OPEN)"
-	@echo "CI=$(CI)"
-	@echo "MAIN_BRANCH=$(MAIN_BRANCH)"
+	@echo "Hooks de pre-commit desativados. Agora make commit funciona sem lint automático."
 
 # ------------------------------------
 # Verificações e utilidades

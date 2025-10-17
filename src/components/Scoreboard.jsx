@@ -2,8 +2,41 @@ import React from 'react';
 import { useGame } from '../contexts/GameContext';
 import './Scoreboard.css';
 
-function Scoreboard({ showFinal = false }) {
+function Scoreboard({ showFinal = false, showStatsOnly = false }) {
   const { state } = useGame();
+  
+  // Se for para mostrar apenas as estatísticas
+  if (showStatsOnly) {
+    return (
+      <div className="scoreboard stats-only">
+        <div className="game-stats">
+          <h3>📈 Estatísticas do Jogo</h3>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <span className="stat-value">{state.gameHistory.length}</span>
+              <span className="stat-label">Rodadas Jogadas</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">{state.players.length}</span>
+              <span className="stat-label">Jogadores</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">
+                {Math.max(...Object.values(state.scores))}
+              </span>
+              <span className="stat-label">Maior Pontuação</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-value">
+                {state.usedQuestionCards.length}
+              </span>
+              <span className="stat-label">Perguntas Usadas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   // Ordena jogadores por pontuação (maior para menor)
   const sortedPlayers = [...state.players].sort((a, b) => {
@@ -126,34 +159,6 @@ function Scoreboard({ showFinal = false }) {
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
-      
-      {showFinal && (
-        <div className="game-stats">
-          <h3>📈 Estatísticas do Jogo</h3>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="stat-value">{state.gameHistory.length}</span>
-              <span className="stat-label">Rodadas Jogadas</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">{state.players.length}</span>
-              <span className="stat-label">Jogadores</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">
-                {Math.max(...Object.values(state.scores))}
-              </span>
-              <span className="stat-label">Maior Pontuação</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">
-                {state.usedQuestionCards.length}
-              </span>
-              <span className="stat-label">Perguntas Usadas</span>
-            </div>
           </div>
         </div>
       )}
