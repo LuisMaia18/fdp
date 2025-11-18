@@ -199,118 +199,134 @@ function WaitingRoom() {
           </div>
         </div>
 
-        {/* Game Configuration */}
-        {state.isHost && (
-          <div className="config-section">
-            <button 
-              className="config-toggle-btn"
-              onClick={() => setShowConfig(!showConfig)}
-            >
-              ⚙️ Configurações do Jogo
-            </button>
-            
-            {showConfig && (
-              <div className="config-panel">
-                <div className="config-grid">
-                  <div className="config-item">
-                    <label>Cartas por Jogador:</label>
-                    <select 
-                      value={gameConfig.cardsPerPlayer}
-                      onChange={(e) => handleConfigChange('cardsPerPlayer', parseInt(e.target.value))}
-                    >
-                      <option value={7}>7 cartas (Difícil)</option>
-                      <option value={10}>10 cartas (Normal)</option>
-                      <option value={12}>12 cartas (Fácil)</option>
-                    </select>
-                  </div>
-                  
-                  <div className="config-item">
-                    <label>Pontos para Vencer:</label>
-                    <select 
-                      value={gameConfig.winningScore}
-                      onChange={(e) => handleConfigChange('winningScore', parseInt(e.target.value))}
-                    >
-                      <option value={3}>3 pontos (Rápido)</option>
-                      <option value={5}>5 pontos (Normal)</option>
-                      <option value={7}>7 pontos (Longo)</option>
-                    </select>
-                  </div>
-                  
-                  <div className="config-item">
-                    <label>Tempo por Rodada:</label>
-                    <select 
-                      value={gameConfig.roundTimer}
-                      onChange={(e) => handleConfigChange('roundTimer', parseInt(e.target.value))}
-                    >
-                      <option value={60}>1 minuto</option>
-                      <option value={120}>2 minutos</option>
-                      <option value={180}>3 minutos</option>
-                      <option value={0}>Sem limite</option>
-                    </select>
-                  </div>
-                  
-                  <div className="config-item">
-                    <label>Máximo de Jogadores:</label>
-                    <select 
-                      value={gameConfig.maxPlayers}
-                      onChange={(e) => handleConfigChange('maxPlayers', parseInt(e.target.value))}
-                    >
-                      <option value={4}>4 jogadores</option>
-                      <option value={6}>6 jogadores</option>
-                      <option value={8}>8 jogadores</option>
-                      <option value={10}>10 jogadores</option>
-                    </select>
-                  </div>
-                </div>
+        {/* Sidebar: Actions + Config + Rules */}
+        <div className="sidebar">
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            {state.isHost ? (
+              <>
+                <button 
+                  className="btn btn-primary btn-large"
+                  onClick={handleStartGame}
+                  disabled={state.players.length < state.gameConfig.minPlayers}
+                >
+                  🎮 Iniciar Jogo ({state.players.length}/{state.gameConfig.minPlayers} min)
+                </button>
                 
-                <div className="config-buttons">
-                  <button className="btn btn-primary" onClick={handleSaveConfig}>
-                    Salvar Configurações
+                {/* Botão para adicionar bot (apenas para testes) */}
+                {import.meta.env.DEV && state.players.length < state.gameConfig.maxPlayers && (
+                  <button 
+                    className="btn btn-secondary"
+                    onClick={addTestBot}
+                  >
+                    🤖 Adicionar Bot (Teste)
                   </button>
-                  <button className="btn btn-ghost" onClick={() => setShowConfig(false)}>
-                    Cancelar
-                  </button>
-                </div>
+                )}
+              </>
+            ) : (
+              <div className="waiting-message">
+                <span className="waiting-icon">⏳</span>
+                Aguardando o host iniciar o jogo...
+              </div>
+            )}
+            
+            <button 
+              className="btn btn-ghost"
+              onClick={handleLeaveRoom}
+            >
+              🚪 Sair da Sala
+            </button>
+
+            {/* Game Configuration */}
+            {state.isHost && (
+              <div className="config-section">
+                <button 
+                  className="config-toggle-btn"
+                  onClick={() => setShowConfig(!showConfig)}
+                >
+                  ⚙️ Configurações do Jogo
+                </button>
+                
+                {showConfig && (
+                  <div className="config-panel">
+                    <div className="config-grid">
+                      <div className="config-item">
+                        <label>Cartas por Jogador:</label>
+                        <select 
+                          value={gameConfig.cardsPerPlayer}
+                          onChange={(e) => handleConfigChange('cardsPerPlayer', parseInt(e.target.value))}
+                        >
+                          <option value={7}>7 cartas (Difícil)</option>
+                          <option value={10}>10 cartas (Normal)</option>
+                          <option value={12}>12 cartas (Fácil)</option>
+                        </select>
+                      </div>
+                      
+                      <div className="config-item">
+                        <label>Pontos para Vencer:</label>
+                        <select 
+                          value={gameConfig.winningScore}
+                          onChange={(e) => handleConfigChange('winningScore', parseInt(e.target.value))}
+                        >
+                          <option value={3}>3 pontos (Rápido)</option>
+                          <option value={5}>5 pontos (Normal)</option>
+                          <option value={7}>7 pontos (Longo)</option>
+                        </select>
+                      </div>
+                      
+                      <div className="config-item">
+                        <label>Tempo por Rodada:</label>
+                        <select 
+                          value={gameConfig.roundTimer}
+                          onChange={(e) => handleConfigChange('roundTimer', parseInt(e.target.value))}
+                        >
+                          <option value={60}>1 minuto</option>
+                          <option value={120}>2 minutos</option>
+                          <option value={180}>3 minutos</option>
+                          <option value={0}>Sem limite</option>
+                        </select>
+                      </div>
+                      
+                      <div className="config-item">
+                        <label>Máximo de Jogadores:</label>
+                        <select 
+                          value={gameConfig.maxPlayers}
+                          onChange={(e) => handleConfigChange('maxPlayers', parseInt(e.target.value))}
+                        >
+                          <option value={4}>4 jogadores</option>
+                          <option value={6}>6 jogadores</option>
+                          <option value={8}>8 jogadores</option>
+                          <option value={10}>10 jogadores</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="config-buttons">
+                      <button className="btn btn-primary" onClick={handleSaveConfig}>
+                        Salvar Configurações
+                      </button>
+                      <button className="btn btn-ghost" onClick={() => setShowConfig(false)}>
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
 
-        {/* Action Buttons */}
-        <div className="action-buttons">
-          {state.isHost ? (
-            <>
-              <button 
-                className="btn btn-primary btn-large"
-                onClick={handleStartGame}
-                disabled={state.players.length < state.gameConfig.minPlayers}
-              >
-                🎮 Iniciar Jogo ({state.players.length}/{state.gameConfig.minPlayers} min)
-              </button>
-              
-              {/* Botão para adicionar bot (apenas para testes) */}
-              {import.meta.env.DEV && state.players.length < state.gameConfig.maxPlayers && (
-                <button 
-                  className="btn btn-secondary"
-                  onClick={addTestBot}
-                >
-                  🤖 Adicionar Bot (Teste)
-                </button>
-              )}
-            </>
-          ) : (
-            <div className="waiting-message">
-              <span className="waiting-icon">⏳</span>
-              Aguardando o host iniciar o jogo...
+          {/* Game Rules */}
+          <div className="rules-section">
+            <h3>Regras Rápidas</h3>
+            <div className="rules-list">
+              <p>• Cada jogador recebe {gameConfig.cardsPerPlayer} cartas de resposta</p>
+              <p>• O FDP da vez lê uma pergunta preta</p>
+              <p>• Todos os outros jogadores escolhem uma carta branca</p>
+              <p>• O FDP escolhe a resposta mais engraçada/absurda</p>
+              <p>• Primeiro a fazer {gameConfig.winningScore} pontos vence!</p>
+              <p>• Conteúdo adulto - jogadores devem ter +18 anos</p>
             </div>
-          )}
-          
-          <button 
-            className="btn btn-ghost"
-            onClick={handleLeaveRoom}
-          >
-            🚪 Sair da Sala
-          </button>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -345,19 +361,6 @@ function WaitingRoom() {
             </div>
           </div>
         )}
-
-        {/* Game Rules */}
-        <div className="rules-section">
-          <h3>Regras Rápidas</h3>
-          <div className="rules-list">
-            <p>• Cada jogador recebe {gameConfig.cardsPerPlayer} cartas de resposta</p>
-            <p>• O FDP da vez lê uma pergunta preta</p>
-            <p>• Todos os outros jogadores escolhem uma carta branca</p>
-            <p>• O FDP escolhe a resposta mais engraçada/absurda</p>
-            <p>• Primeiro a fazer {gameConfig.winningScore} pontos vence!</p>
-            <p>• Conteúdo adulto - jogadores devem ter +18 anos</p>
-          </div>
-        </div>
       </div>
     </div>
   );
