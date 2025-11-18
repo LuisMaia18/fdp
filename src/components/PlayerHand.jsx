@@ -9,7 +9,7 @@ function PlayerHand({ selectedCard, onCardSelect }) {
 
   const handleCardClick = (card) => {
     if (selectedCard === card) {
-      onCardSelect(null); // Deseleciona se já estava selecionada
+      onCardSelect(null);
     } else {
       onCardSelect(card);
     }
@@ -28,8 +28,23 @@ function PlayerHand({ selectedCard, onCardSelect }) {
   return (
     <div className="player-hand">
       <div className="hand-header">
-        <h3>Suas Cartas ({playerHand.length})</h3>
-        <p>Clique em uma carta para selecioná-la</p>
+        <h3>
+          {selectedCard ? (
+            <>
+              ✓ Carta Selecionada ({playerHand.length - 1} restantes)
+            </>
+          ) : (
+            <>
+              🎯 Suas Cartas ({playerHand.length})
+            </>
+          )}
+        </h3>
+        <p>
+          {selectedCard ? 
+            'Carta escolhida! Confirme sua jogada abaixo 👇' : 
+            'Clique em uma carta para selecioná-la'
+          }
+        </p>
       </div>
       
       <div className="cards-container">
@@ -52,15 +67,6 @@ function PlayerHand({ selectedCard, onCardSelect }) {
           ))}
         </div>
       </div>
-      
-      {selectedCard && (
-        <div className="selected-card-preview">
-          <h4>Carta Selecionada:</h4>
-          <div className="preview-card">
-            {selectedCard}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

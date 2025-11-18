@@ -1,26 +1,30 @@
 /* Timer Styles */
 .timer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 10px;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 15px 20px;
-  border-radius: 15px;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 16px;
+  border-radius: 25px;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  min-width: auto;
 }
 
 .timer.urgent {
   background: rgba(255, 193, 7, 0.9);
   border: 2px solid #ffc107;
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
 }
 
 .timer.critical {
   background: rgba(220, 53, 69, 0.9);
   border: 2px solid #dc3545;
   animation: timerPulse 1s infinite;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.5);
 }
 
 .timer-display {
@@ -36,12 +40,12 @@
 
 .timer-text {
   color: white;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 700;
   font-family: 'Courier New', monospace;
-  min-width: 60px;
+  min-width: 50px;
   text-align: center;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .timer.urgent .timer-text {

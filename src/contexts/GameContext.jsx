@@ -238,6 +238,7 @@ function gameReducer(state, action) {
       
     case ACTIONS.SUBMIT_ANSWER: {
       const { playerId: submitterId, answerCard } = action.payload;
+      
       return {
         ...state,
         submittedAnswers: {
@@ -826,6 +827,7 @@ export function GameProvider({ children }) {
       if (state.currentPlayer && state.currentPlayer.id !== state.currentFDP) {
         // Evita submissões repetidas
         if (state.submittedAnswers[state.currentPlayer.id]) return;
+        
         dispatch({
           type: ACTIONS.SUBMIT_ANSWER,
           payload: { playerId: state.currentPlayer.id, answerCard }
@@ -837,10 +839,13 @@ export function GameProvider({ children }) {
         // Se somos host, verificamos se é a última resposta e avançamos para a votação
         if (state.isHost) {
           const needed = state.players.filter(p => p.id !== state.currentFDP).length;
-          const received = new Set([...Object.keys(state.submittedAnswers), state.currentPlayer.id]).size;
+          // Conta apenas respostas de jogadores que não são FDP
+          const nonFDPAnswers = Object.keys(state.submittedAnswers).filter(id => id !== state.currentFDP);
+          const received = new Set([...nonFDPAnswers, state.currentPlayer.id]).size;
+          
           if (received >= needed && state.gameState === GAME_STATES.PLAYING) {
             // Define ordem estável das respostas desta votação
-            const ids = Array.from(new Set([...Object.keys(state.submittedAnswers), state.currentPlayer.id]));
+            const ids = Array.from(new Set([...nonFDPAnswers, state.currentPlayer.id]));
             const randomized = [...ids].sort(() => Math.random() - 0.5);
             dispatch({ type: ACTIONS.SET_ANSWER_ORDER, payload: randomized });
             dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.ROUND_VOTING });

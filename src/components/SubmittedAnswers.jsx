@@ -90,7 +90,7 @@ function SubmittedAnswers({ question, answers, onSelectWinner, canVote, currentP
               <span></span>
             </span>
           </div>
-          <p>Aguardando a decisão do FDP...</p>
+          <p>⏳ Aguardando a decisão do FDP...</p>
         </div>
       )}
     </div>

@@ -25,19 +25,6 @@ function Timer() {
         <span className="timer-icon">⏱️</span>
         <span className="timer-text">{formattedTime}</span>
       </div>
-      
-      <div className="timer-progress">
-        <div 
-          className="progress-fill"
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-      
-      {isCritical && (
-        <div className="timer-warning">
-          Tempo esgotando!
-        </div>
-      )}
     </div>
   );
 }

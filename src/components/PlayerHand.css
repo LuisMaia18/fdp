@@ -23,9 +23,11 @@
 }
 
 .hand-header p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
   margin: 0;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .no-cards {
@@ -51,27 +53,28 @@
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  padding: 0;
-  justify-items: center;
-  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 25px;
+  padding: 40px 0;
+  margin-bottom: 50px;
 }
 
 .answer-card {
   background: white;
   border: 3px solid #e0e0e0;
-  border-radius: 15px;
+  border-radius: 12px;
   padding: 20px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.3s ease;
   position: relative;
-  overflow: hidden;
   min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(0);
+  z-index: 1;
 }
 
 .answer-card::before {
@@ -88,10 +91,11 @@
 }
 
 .answer-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15);
-  border-color: #a0a9ea;
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.25);
+  border-color: #667eea;
   background: #fafbff;
+  z-index: 2;
 }
 
 .answer-card:hover::before {
@@ -99,32 +103,52 @@
 }
 
 .answer-card.selected {
-  border-color: #28a745;
-  background: linear-gradient(135deg, #d4edda 0%, #f8fff8 50%, #ffffff 100%);
-  transform: translateY(-6px);
-  box-shadow: 0 12px 25px rgba(40, 167, 69, 0.3);
-  border-width: 4px;
-  animation: selected-glow 2s ease-in-out infinite;
+  border: 4px solid #28a745;
+  background: linear-gradient(145deg, #d4edda 0%, #e8f5e8 100%);
+  transform: translateY(-25px) scale(1.1);
+  box-shadow: 0 20px 50px rgba(40, 167, 69, 0.5), 0 0 0 4px rgba(40, 167, 69, 0.3);
+  animation: selected-glow 2s ease-in-out infinite alternate;
+  z-index: 100;
+  position: relative;
 }
 
 .answer-card.selected::before {
-  background: linear-gradient(45deg, #28a745, #20c997);
-  opacity: 1;
-  border-radius: 15px 15px 0 0;
-  height: 6px;
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: linear-gradient(45deg, #28a745, #20c997, #17a2b8, #28a745);
+  background-size: 300% 300%;
+  border-radius: 20px;
+  z-index: -1;
+  animation: selected-border-glow 1.5s ease-in-out infinite, gradient-shift 3s ease-in-out infinite;
 }
 
 .answer-card.selected .card-text {
   color: #155724;
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 @keyframes selected-glow {
-  0%, 100% {
-    box-shadow: 0 12px 25px rgba(40, 167, 69, 0.3);
+  0% { 
+    box-shadow: 0 20px 50px rgba(40, 167, 69, 0.5), 0 0 0 4px rgba(40, 167, 69, 0.3);
   }
-  50% {
-    box-shadow: 0 12px 25px rgba(40, 167, 69, 0.5), 0 0 20px rgba(40, 167, 69, 0.3);
+  100% { 
+    box-shadow: 0 25px 60px rgba(40, 167, 69, 0.7), 0 0 0 8px rgba(40, 167, 69, 0.5);
+  }
+}
+
+@keyframes selected-border-glow {
+  0% { 
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1.02);
   }
 }
 
@@ -145,69 +169,54 @@
 
 .selection-indicator {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #28a745;
+  top: -12px;
+  right: -12px;
+  background: linear-gradient(45deg, #28a745, #20c997);
   color: white;
-  width: 32px;
-  height: 32px;
   border-radius: 50%;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: checkBounce 0.4s ease;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  font-weight: 900;
+  font-size: 1.2rem;
   border: 3px solid white;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+  animation: checkBounce 0.6s ease-out;
+  z-index: 10;
 }
 
 .check-icon {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.selected-card-preview {
-  margin-top: 25px;
-  padding: 20px;
-  background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
-  border-radius: 15px;
-  border: 3px solid #2196f3;
-  text-align: center;
-  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.2);
-}
-
-.selected-card-preview h4 {
-  color: #1565c0;
   font-size: 1.2rem;
-  margin-bottom: 15px;
-  font-weight: 700;
-}
-
-.preview-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  color: #1565c0;
-  font-weight: 600;
-  border: 2px solid #2196f3;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
-  margin: 0 auto;
-  max-width: 400px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Animations */
 @keyframes checkBounce {
-  0% {
+  0% { 
     transform: scale(0);
     opacity: 0;
   }
-  50% {
-    transform: scale(1.2);
+  50% { 
+    transform: scale(1.3);
     opacity: 1;
   }
-  100% {
+  100% { 
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -251,56 +260,80 @@
 /* Responsive */
 @media (max-width: 768px) {
   .cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
+    padding: 15px 0;
   }
   
   .answer-card {
-    padding: 15px;
     min-height: 100px;
+    padding: 15px;
   }
   
-  .card-text {
+  .answer-card.selected {
+    transform: translateY(-20px) scale(1.08);
+    box-shadow: 0 20px 45px rgba(40, 167, 69, 0.5), 0 0 0 4px rgba(40, 167, 69, 0.3);
+  }
+  
+  .answer-card:hover {
+    transform: translateY(-6px) scale(1.01);
+  }
+  
+  .selection-indicator {
+    width: 28px;
+    height: 28px;
     font-size: 1rem;
-  }
-  
-  .hand-header h3 {
-    font-size: 1.4rem;
-    padding: 12px;
+    top: -6px;
+    right: -6px;
   }
   
   .selected-card-preview {
+    margin-top: 20px;
     padding: 20px;
   }
   
   .preview-card {
     font-size: 1.1rem;
-    padding: 15px;
+    padding: 18px;
   }
 }
 
 @media (max-width: 480px) {
   .cards-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    padding: 10px 0;
   }
   
   .answer-card {
+    min-height: 90px;
     padding: 12px;
-    min-height: 80px;
+  }
+  
+  .answer-card.selected {
+    transform: translateY(-10px) scale(1.02);
+  }
+  
+  .answer-card:hover {
+    transform: translateY(-4px) scale(1.01);
   }
   
   .card-text {
-    font-size: 0.95rem;
-  }
-  
-  .hand-header h3 {
-    font-size: 1.2rem;
-    padding: 10px;
-  }
-  
-  .hand-header p {
     font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  
+  .selection-indicator {
+    width: 24px;
+    height: 24px;
+    font-size: 0.9rem;
+    top: -4px;
+    right: -4px;
+  }
+  
+  .selected-card-preview {
+    margin-top: 15px;
+    padding: 15px;
   }
   
   .selected-card-preview h4 {
@@ -309,7 +342,16 @@
   
   .preview-card {
     font-size: 1rem;
+    padding: 15px;
+  }
+  
+  .hand-header h3 {
+    font-size: 1.3rem;
     padding: 12px;
+  }
+  
+  .hand-header p {
+    font-size: 0.95rem;
   }
 }
 
