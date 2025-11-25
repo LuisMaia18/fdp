@@ -43,36 +43,81 @@
   height: var(--mascot-size, 40px);
 }
 
-/* Speech bubble */
+/* ===================================
+   SPEECH BUBBLE - Fala do Mascote
+   =================================== */
+
 .mascot-speech {
   position: absolute;
-  top: -14px;
-  left: calc(100% + 10px);
-  background: rgba(255,255,255,0.95);
-  color: #333;
-  padding: 8px 12px;
-  border-radius: 10px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  top: -18px;
+  left: calc(100% + 15px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240,248,255,0.98) 100%);
+  backdrop-filter: blur(10px);
+  color: #1a1a1a;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 2px solid rgba(74, 144, 226, 0.3);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.5);
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 1rem;
   white-space: nowrap;
+  animation: speechBubble 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 1000;
+}
+
+@keyframes speechBubble {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .mascot-speech::before {
   content: '';
   position: absolute;
   right: 100%;
-  top: 16px;
-  border: 8px solid transparent;
-  border-right-color: rgba(255,255,255,0.95);
+  top: 20px;
+  border: 10px solid transparent;
+  border-right-color: rgba(74, 144, 226, 0.3);
+  margin-right: 2px;
 }
 
+.mascot-speech::after {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 22px;
+  border: 8px solid transparent;
+  border-right-color: rgba(255,255,255,0.98);
+}
 
-/* Inline variant speech tweaks */
+/* ===================================
+   INLINE VARIANT - Modo Inline
+   =================================== */
+
 .mascot--inline .mascot-speech {
-  top: -6px;
-  font-size: 0.75rem;
-  padding: 6px 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  left: calc(100% + 20px);
+  font-size: 0.95rem;
+  padding: 10px 16px;
+  max-width: 280px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.mascot--inline .mascot-speech::before {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.mascot--inline .mascot-speech::after {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Orbit sparkles */

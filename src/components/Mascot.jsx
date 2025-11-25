@@ -8,7 +8,7 @@ import './Mascot.css';
  * - variant: 'hero' | 'inline' (default 'inline')
  * - floating: boolean (default true)
  * - glow: boolean (default true)
- * - speech: optional string to show a small speech bubble (hero only)
+ * - speech: optional string to show speech bubble (works for both variants)
  * - ariaLabel: accessible label for the mascot role=img
  */
 function Mascot({
@@ -31,7 +31,7 @@ function Mascot({
     >
       <div className="mascot-ring" aria-hidden="true" />
       <img className="mascot-img" src="/mascot_monkey.svg" alt="" loading="lazy" />
-      {speech && variant === 'hero' && (
+      {speech && (
         <div className="mascot-speech" aria-hidden="true">{speech}</div>
       )}
     </div>

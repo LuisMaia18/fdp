@@ -2,6 +2,180 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { dealInitialCards, getNextQuestionCard, shuffleArray } from '../data/cards';
 
+// ===================================
+// BOT AI - Sistema inteligente de escolha de cartas
+// ===================================
+
+/**
+ * Analisa a compatibilidade entre uma pergunta e uma resposta
+ * Retorna um score de 0 a 100
+ */
+function analyzeCardCompatibility(question, answer) {
+  if (!question || !answer) return 0;
+  
+  const questionLower = question.toLowerCase();
+  const answerLower = answer.toLowerCase();
+  
+  let score = 30; // Score base
+  
+  // Palavras-chave que aumentam compatibilidade
+  const funnyKeywords = ['cu', 'buceta', 'pau', 'merda', 'porra', 'caralho', 'fodendo', 'bosta', 'peido', 'mijando', 'cagando', 'bêbado', 'drogado', 'viado', 'puta', 'vagabundo'];
+  const actionKeywords = ['fazer', 'comendo', 'bebendo', 'dançando', 'cantando', 'pulando', 'correndo', 'gritando', 'chorando', 'rindo'];
+  const objectKeywords = ['dildo', 'garrafa', 'pepino', 'banana', 'melancia', 'salsicha', 'linguiça'];
+  
+  // Conta palavras engraçadas na resposta
+  let funnyCount = 0;
+  funnyKeywords.forEach(keyword => {
+    if (answerLower.includes(keyword)) {
+      score += 15;
+      funnyCount++;
+    }
+  });
+  
+  // Bônus por ações
+  actionKeywords.forEach(keyword => {
+    if (answerLower.includes(keyword)) score += 8;
+  });
+  
+  // Bônus por objetos inusitados
+  objectKeywords.forEach(keyword => {
+    if (answerLower.includes(keyword)) score += 12;
+  });
+  
+  // Bônus se a resposta é absurdamente longa (mais engraçado)
+  if (answerLower.length > 50) score += 10;
+  
+  // Bônus se a resposta é bem curta e objetiva
+  if (answerLower.length < 20 && funnyCount > 0) score += 15;
+  
+  // Penalidade para respostas muito genéricas
+  const genericWords = ['pessoa', 'coisa', 'algo', 'alguém', 'isso'];
+  genericWords.forEach(word => {
+    if (answerLower === word || answerLower === `uma ${word}` || answerLower === `um ${word}`) {
+      score -= 20;
+    }
+  });
+  
+  // Bônus por contraste/absurdo (se a pergunta é séria e a resposta absurda)
+  const seriousQuestionWords = ['primeiro', 'última', 'melhor', 'pior', 'favorito', 'importante'];
+  const hasSerious = seriousQuestionWords.some(word => questionLower.includes(word));
+  if (hasSerious && funnyCount > 0) score += 20;
+  
+  return Math.min(100, Math.max(0, score));
+}
+
+/**
+ * Bot escolhe a melhor carta da mão baseado na pergunta
+ */
+function chooseBestBotCard(question, hand) {
+  if (!hand || hand.length === 0) return null;
+  
+  // Analisa todas as cartas e retorna a com melhor score
+  const cardScores = hand.map(card => ({
+    card,
+    score: analyzeCardCompatibility(question, card)
+  }));
+  
+  // Ordena por score (maior primeiro)
+  cardScores.sort((a, b) => b.score - a.score);
+  
+  // 70% chance de escolher a melhor, 20% segunda melhor, 10% terceira
+  const rand = Math.random();
+  if (rand < 0.7 || cardScores.length === 1) {
+    return cardScores[0].card;
+  } else if (rand < 0.9 && cardScores.length > 1) {
+    return cardScores[1].card;
+  } else if (cardScores.length > 2) {
+    return cardScores[2].card;
+  }
+  
+  return cardScores[0].card;
+}
+
+/**
+ * Bot escolhe a melhor resposta quando é FDP
+ */
+function chooseBestWinnerBot(question, submittedAnswers) {
+  if (!submittedAnswers || Object.keys(submittedAnswers).length === 0) return null;
+  
+  const playerIds = Object.keys(submittedAnswers);
+  const scores = playerIds.map(playerId => ({
+    playerId,
+    score: analyzeCardCompatibility(question, submittedAnswers[playerId])
+  }));
+  
+  scores.sort((a, b) => b.score - a.score);
+  
+  // 60% chance de escolher a melhor, 30% segunda, 10% terceira
+  const rand = Math.random();
+  if (rand < 0.6 || scores.length === 1) {
+    return scores[0].playerId;
+  } else if (rand < 0.9 && scores.length > 1) {
+    return scores[1].playerId;
+  } else if (scores.length > 2) {
+    return scores[2].playerId;
+  }
+  
+  return scores[0].playerId;
+}
+
+// ===================================
+// MASCOT PHRASES - Frases dinâmicas do mascote
+// ===================================
+
+export const MASCOT_PHRASES = {
+  LOBBY: [
+    "Preparados para rir até não aguentar mais? 🐵",
+    "Vamos ver quem tem as cartas mais sacanas hoje! 🃏",
+    "Bora começar logo essa farra, pessoal! 🎉",
+    "Preparem-se para combinações absolutamente absurdas! 😂",
+    "Que comece o caos! Adoro esse jogo! 🔥"
+  ],
+  WAITING_FOR_PLAYERS: [
+    "Aguardando os atrasados... Como sempre! ⏰",
+    "Mais alguém vindo ou é só a galera raiz mesmo? 🤔",
+    "Paciência, pessoal. Já começa! ⌛",
+    "Quem faltar vai perder risadas épicas! 😄"
+  ],
+  PLAYING: [
+    "Escolham com sabedoria... ou não! 😈",
+    "Essa rodada promete ser hilária! 🤣",
+    "Alguém vai se arrepender dessa escolha... 👀",
+    "Quero ver quem tem coragem de jogar essa carta! 😏",
+    "Pensem rápido! O tempo não espera! ⏱️",
+    "Essa vai ser boa, eu sinto! 🎭"
+  ],
+  ROUND_VOTING: [
+    "Hora de escolher o FDP da rodada! 🏆",
+    "Qual combinação foi a mais absurda? 🤔",
+    "Votem na resposta mais criativa (ou bizarra)! 😂",
+    "Decisão difícil, hein? Todas são ótimas! 🔥",
+    "O FDP vai rir muito quando descobrir quem ganhou! 😈"
+  ],
+  ROUND_RESULTS: [
+    "E o vencedor é... 🥁",
+    "Essa combinação foi genial! 🎉",
+    "Parabéns ao mais criativo (ou sem vergonha)! 🏆",
+    "Essa vai entrar para a história! 😂",
+    "Próxima rodada vem ainda melhor! 🔥"
+  ],
+  GAME_OVER: [
+    "Que jogo épico! Parabéns ao campeão! 🏆🎉",
+    "Esse foi o melhor jogo que já vi! 🤩",
+    "O vencedor merece um troféu... ou terapia! 😅",
+    "Obrigado pelas risadas, pessoal! Joguem de novo! 🐵",
+    "Jogo finalizado! Quem topa revanche? 🔄"
+  ]
+};
+
+/**
+ * Retorna uma frase aleatória do mascote baseada no estado atual do jogo
+ */
+export function getMascotPhrase(gameState) {
+  const phrases = MASCOT_PHRASES[gameState] || MASCOT_PHRASES.LOBBY;
+  return phrases[Math.floor(Math.random() * phrases.length)];
+}
+
 // Estados possíveis do jogo
 export const GAME_STATES = {
   LOBBY: 'LOBBY',
@@ -541,6 +715,79 @@ export function GameProvider({ children }) {
       }
     }
   }, [state.isHost, state.gameState, state.players, state.currentFDP, state.submittedAnswers, state.playerHands, state.gameConfig?.votingTimer, state.gameConfig?.roundTimer, state.gameConfig?.resultsDelaySec]);
+
+  // ===================================
+  // BOT AI - Automação de jogadas
+  // ===================================
+  
+  // Bots jogam automaticamente durante PLAYING
+  useEffect(() => {
+    if (state.gameState !== GAME_STATES.PLAYING || !state.isHost) return;
+    
+    const bots = state.players.filter(p => p.isBot && p.id !== state.currentFDP);
+    
+    bots.forEach(bot => {
+      // Se o bot já jogou, pula
+      if (state.submittedAnswers[bot.id]) return;
+      
+      // Espera um tempo aleatório (2-8 segundos) para simular "pensamento"
+      const thinkingTime = 2000 + Math.random() * 6000;
+      
+      setTimeout(() => {
+        // Verifica se ainda está na fase de jogo e bot não jogou
+        if (stateRef.current.gameState === GAME_STATES.PLAYING && !stateRef.current.submittedAnswers[bot.id]) {
+          const botHand = stateRef.current.playerHands[bot.id] || [];
+          if (botHand.length > 0) {
+            const chosenCard = chooseBestBotCard(stateRef.current.currentQuestionCard, botHand);
+            if (chosenCard) {
+              console.log(`🤖 Bot ${bot.name} escolheu carta:`, chosenCard);
+              dispatch({
+                type: ACTIONS.SUBMIT_ANSWER,
+                payload: { playerId: bot.id, answerCard: chosenCard }
+              });
+              postMessageBC('ANSWER_SUBMITTED', { playerId: bot.id, answerCard: chosenCard });
+            }
+          }
+        }
+      }, thinkingTime);
+    });
+  }, [state.gameState, state.players, state.currentFDP, state.submittedAnswers, state.isHost, state.playerHands]);
+  
+  // Bot FDP escolhe vencedor automaticamente
+  useEffect(() => {
+    if (state.gameState !== GAME_STATES.ROUND_VOTING || !state.isHost) return;
+    
+    const fdpPlayer = state.players.find(p => p.id === state.currentFDP);
+    if (!fdpPlayer || !fdpPlayer.isBot) return;
+    
+    // Bot FDP espera 3-7 segundos para "analisar" as respostas
+    const thinkingTime = 3000 + Math.random() * 4000;
+    
+    setTimeout(() => {
+      if (stateRef.current.gameState === GAME_STATES.ROUND_VOTING) {
+        const winnerId = chooseBestWinnerBot(stateRef.current.currentQuestionCard, stateRef.current.submittedAnswers);
+        if (winnerId) {
+          console.log(`🤖 Bot FDP ${fdpPlayer.name} escolheu vencedor:`, winnerId);
+          dispatch({ type: ACTIONS.SET_ROUND_WINNER, payload: winnerId });
+          const newScore = (stateRef.current.scores[winnerId] || 0) + 1;
+          if (newScore >= stateRef.current.gameConfig.winningScore) {
+            dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.GAME_OVER });
+            setTimeout(() => sendSnapshot(), 10);
+          } else {
+            dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.ROUND_RESULTS });
+            setTimeout(() => sendSnapshot(), 10);
+            setTimeout(() => {
+              dispatch({ type: ACTIONS.NEXT_ROUND });
+              dispatch({ type: ACTIONS.SET_QUESTION_CARD });
+              dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.PLAYING });
+              dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: stateRef.current.gameConfig.roundTimer });
+              setTimeout(() => sendSnapshot(), 10);
+            }, (stateRef.current.gameConfig?.resultsDelaySec ?? 3) * 1000);
+          }
+        }
+      }
+    }, thinkingTime);
+  }, [state.gameState, state.players, state.currentFDP, state.isHost, state.submittedAnswers]);
 
   // Timer effect
   useEffect(() => {

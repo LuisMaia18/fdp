@@ -1,78 +1,116 @@
-/* Player Hand Styles */
+/* ===================================
+   PLAYER HAND - Cartas do Jogador
+   =================================== */
+
 .player-hand {
   width: 100%;
   margin-bottom: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeInUp 0.5s ease;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   HAND HEADER - Cabeçalho das Cartas
+   =================================== */
 
 .hand-header {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 }
 
 .hand-header h3 {
-  color: white;
-  font-size: 1.6rem;
-  margin-bottom: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 15px;
-  border-radius: 15px;
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 18px;
+  border-radius: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hand-header p {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   margin: 0;
-  font-weight: 500;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
 }
+
+/* ===================================
+   NO CARDS - Estado Sem Cartas
+   =================================== */
 
 .no-cards {
   text-align: center;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
+  padding: 50px;
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  max-width: 500px;
 }
 
 .no-cards p {
-  color: white;
-  font-size: 1.2rem;
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 600;
   margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
+
+/* ===================================
+   CARDS CONTAINER - Container das Cartas
+   =================================== */
 
 .cards-container {
   margin-bottom: 25px;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto 25px auto;
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 25px;
-  padding: 40px 0;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+  padding: 40px 20px;
   margin-bottom: 50px;
 }
 
+/* ===================================
+   ANSWER CARD - Carta Individual
+   =================================== */
+
 .answer-card {
-  background: white;
-  border: 3px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border: 3px solid rgba(74, 144, 226, 0.3);
+  border-radius: 16px;
+  padding: 25px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
-  min-height: 120px;
+  min-height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5);
   transform: translateY(0);
   z-index: 1;
 }
@@ -83,30 +121,44 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  height: 5px;
+  background: linear-gradient(90deg, #4a90e2 0%, #357abd 50%, #4a90e2 100%);
+  background-size: 200% 100%;
   opacity: 0;
-  transition: opacity 0.25s ease;
-  border-radius: 15px 15px 0 0;
+  transition: opacity 0.3s ease;
+  border-radius: 16px 16px 0 0;
+  animation: shimmerHidden 2s linear infinite;
+}
+
+@keyframes shimmerHidden {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .answer-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.25);
-  border-color: #667eea;
-  background: #fafbff;
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 18px 40px rgba(74, 144, 226, 0.35);
+  border-color: #4a90e2;
+  background: linear-gradient(145deg, #ffffff 0%, #e3f2fd 100%);
   z-index: 2;
 }
 
 .answer-card:hover::before {
-  opacity: 0;
+  opacity: 1;
 }
 
+/* ===================================
+   SELECTED CARD - Carta Selecionada
+   =================================== */
+
 .answer-card.selected {
-  border: 4px solid #28a745;
-  background: linear-gradient(145deg, #d4edda 0%, #e8f5e8 100%);
-  transform: translateY(-25px) scale(1.1);
-  box-shadow: 0 20px 50px rgba(40, 167, 69, 0.5), 0 0 0 4px rgba(40, 167, 69, 0.3);
+  border: 5px solid #4ade80;
+  background: linear-gradient(145deg, #d1fae5 0%, #a7f3d0 100%);
+  transform: translateY(-30px) scale(1.12);
+  box-shadow: 
+    0 25px 60px rgba(74, 222, 128, 0.6), 
+    0 0 0 5px rgba(74, 222, 128, 0.3),
+    0 0 40px rgba(74, 222, 128, 0.4);
   animation: selected-glow 2s ease-in-out infinite alternate;
   z-index: 100;
   position: relative;
@@ -115,29 +167,46 @@
 .answer-card.selected::before {
   content: '';
   position: absolute;
-  top: -8px;
-  left: -8px;
-  right: -8px;
-  bottom: -8px;
-  background: linear-gradient(45deg, #28a745, #20c997, #17a2b8, #28a745);
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(
+    45deg, 
+    #4ade80 0%, 
+    #22c55e 25%, 
+    #10b981 50%, 
+    #22c55e 75%, 
+    #4ade80 100%
+  );
   background-size: 300% 300%;
-  border-radius: 20px;
+  border-radius: 24px;
   z-index: -1;
-  animation: selected-border-glow 1.5s ease-in-out infinite, gradient-shift 3s ease-in-out infinite;
+  opacity: 1;
+  animation: 
+    selected-border-glow 1.5s ease-in-out infinite, 
+    gradient-shift 3s ease-in-out infinite;
 }
 
 .answer-card.selected .card-text {
-  color: #155724;
-  font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+  color: #065f46;
+  font-weight: 800;
+  font-size: 1.15rem;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
 }
 
 @keyframes selected-glow {
   0% { 
-    box-shadow: 0 20px 50px rgba(40, 167, 69, 0.5), 0 0 0 4px rgba(40, 167, 69, 0.3);
+    box-shadow: 
+      0 25px 60px rgba(74, 222, 128, 0.6), 
+      0 0 0 5px rgba(74, 222, 128, 0.3),
+      0 0 40px rgba(74, 222, 128, 0.4);
   }
   100% { 
-    box-shadow: 0 25px 60px rgba(40, 167, 69, 0.7), 0 0 0 8px rgba(40, 167, 69, 0.5);
+    box-shadow: 
+      0 30px 70px rgba(74, 222, 128, 0.8), 
+      0 0 0 8px rgba(74, 222, 128, 0.5),
+      0 0 50px rgba(74, 222, 128, 0.6);
   }
 }
 
@@ -148,7 +217,7 @@
   }
   100% { 
     opacity: 1;
-    transform: scale(1.02);
+    transform: scale(1.03);
   }
 }
 

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useGame } from '../contexts/GameContext';
+import { useGame, getMascotPhrase } from '../contexts/GameContext';
 import PlayerHand from './PlayerHand';
 import SubmittedAnswers from './SubmittedAnswers';
 import Timer from './Timer';
@@ -13,6 +13,7 @@ function GameBoard() {
   const [selectedAnswerCard, setSelectedAnswerCard] = useState(null);
   const [showScoreboard, setShowScoreboard] = useState(false);
   const [roundTransitionSeconds, setRoundTransitionSeconds] = useState(0);
+  const [mascotPhrase, setMascotPhrase] = useState('');
 
   const isCurrentPlayerFDP = state.currentPlayer?.id === state.currentFDP;
   const hasSubmittedAnswer = state.submittedAnswers[state.currentPlayer?.id];
@@ -45,6 +46,11 @@ function GameBoard() {
     // Somente o host controla a transição de fase; clientes aguardam snapshot
     // O host já trata a virada para ROUND_VOTING em GameContext ao detectar todas as respostas
   }, [allPlayersSubmitted, state.gameState, isCurrentPlayerFDP]);
+
+  // Atualiza frase do mascote quando o estado do jogo muda
+  useEffect(() => {
+    setMascotPhrase(getMascotPhrase(state.gameState));
+  }, [state.gameState]);
 
   // Exibe contagem regressiva durante tela de resultados (transição para próxima rodada)
   useEffect(() => {
@@ -102,7 +108,11 @@ function GameBoard() {
       {/* Header */}
       <div className="game-header">
         <div className="game-info">
-          <Mascot variant="inline" className={"mascot-inline" + mascotEmoteClass} />
+          <Mascot 
+            variant="inline" 
+            className={"mascot-inline" + mascotEmoteClass}
+            speech={mascotPhrase}
+          />
           <span className="game-title">Foi De Propósito</span>
           {/* Timer integrado na navbar */}
           <div style={{ marginLeft: '20px' }}>
