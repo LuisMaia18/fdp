@@ -506,16 +506,19 @@ function gameReducer(state, action) {
       const nextFDP = state.players[nextFDPIndex].id;
       
       console.log('NEXT_ROUND: FDP atual:', state.currentFDP, 'Próximo FDP:', nextFDP, 'Jogador:', state.players[nextFDPIndex].name);
+      console.log('NEXT_ROUND: Reiniciando rodada com gameState PLAYING');
       
       return {
         ...state,
+        gameState: GAME_STATES.PLAYING,
         playerHands: newPlayerHands,
         remainingAnswerCards: state.remainingAnswerCards.slice(cardsUsed),
         currentFDP: nextFDP,
         submittedAnswers: {},
         roundWinner: null,
         selectedCards: [],
-        answerOrder: []
+        answerOrder: [],
+        timeRemaining: state.gameConfig.roundTimer
       };
     }
       

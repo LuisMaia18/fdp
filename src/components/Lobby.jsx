@@ -135,7 +135,7 @@ function Lobby() {
         {/* Header Compacto */}
         <div className="lobby-header-compact">
           <div className="brand-section">
-            <Mascot variant="hero" size={80} speech="Bora jogar?" className="mascot-hero" />
+            <Mascot variant="hero" size={80} className="mascot-hero" />
             <div className="brand-text">
               <h1 className="game-title-compact">
                 <span className="title-main">Foi De Propósito</span>

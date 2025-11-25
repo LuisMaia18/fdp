@@ -970,18 +970,20 @@ html:has(.game-over-section) {
   backdrop-filter: blur(15px);
   border: 3px solid rgba(255, 215, 0, 0.4);
   border-radius: 24px;
-  padding: 50px;
+  padding: 30px 50px;
   text-align: center;
-  max-width: 700px;
+  max-width: 95%;
   width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .round-results h2 {
   color: #ffffff;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 800;
-  margin-bottom: 35px;
+  margin-bottom: 25px;
   text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
   letter-spacing: 1px;
 }
@@ -991,19 +993,19 @@ html:has(.game-over-section) {
    =================================== */
 
 .winner-announcement {
-  margin-bottom: 35px;
+  margin-bottom: 25px;
 }
 
 .winner-card {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 25px;
+  gap: 20px;
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
   background-size: 200% 100%;
-  padding: 30px;
+  padding: 20px;
   border-radius: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   animation: celebrationShimmer 3s ease-in-out infinite;
   position: relative;
@@ -1039,24 +1041,24 @@ html:has(.game-over-section) {
 }
 
 .winner-avatar {
-  width: 90px;
-  height: 90px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  border: 5px solid rgba(255, 255, 255, 0.8);
+  border: 4px solid rgba(255, 255, 255, 0.8);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .winner-info h3 {
   color: #1a1a1a;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
-  margin: 0 0 8px 0;
+  margin: 0 0 5px 0;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .winner-info p {
   color: #2d2d2d;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
 }
@@ -1065,16 +1067,16 @@ html:has(.game-over-section) {
   background: rgba(74, 144, 226, 0.15);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(74, 144, 226, 0.3);
-  padding: 30px;
+  padding: 20px;
   border-radius: 15px;
-  border-left: 6px solid #4a90e2;
+  border-left: 5px solid #4a90e2;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .winning-question {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   color: #ffffff;
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 600;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -1582,20 +1584,21 @@ html:has(.game-over-section) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
+  justify-content: flex-start;
+  padding: 15px 20px 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
   overflow-y: auto;
-  gap: 30px;
+  gap: 15px;
   animation: fadeInUp 0.8s ease-out;
+  max-height: calc(100vh - 80px);
 }
 
 /* Celebration Header */
 .celebration-header {
   text-align: center;
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .confetti-animation {
@@ -1617,18 +1620,18 @@ html:has(.game-over-section) {
 }
 
 .trophy-bounce {
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   animation: bounceIn 1s ease-out;
 }
 
 .celebration-trophy {
-  font-size: 4rem;
+  font-size: 2.5rem;
   filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.4));
   animation: trophyGlow 2s ease-in-out infinite alternate;
 }
 
 .celebration-title {
-  font-size: 3rem;
+  font-size: 1.8rem;
   font-weight: 800;
   background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
   background-size: 200% 200%;
@@ -1641,9 +1644,9 @@ html:has(.game-over-section) {
 }
 
 .celebration-subtitle {
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.9);
-  margin-top: 10px;
+  margin-top: 5px;
   font-weight: 600;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -1653,15 +1656,16 @@ html:has(.game-over-section) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 25px;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.15);
-  padding: 40px;
-  border-radius: 25px;
+  padding: 25px 40px;
+  border-radius: 20px;
   backdrop-filter: blur(15px);
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 .winner-avatar-container {
@@ -1672,8 +1676,8 @@ html:has(.game-over-section) {
 }
 
 .winner-avatar {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: linear-gradient(45deg, #ffd700, #ffed4e);
   display: flex;
@@ -1685,7 +1689,7 @@ html:has(.game-over-section) {
 }
 
 .avatar-initials {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 900;
   color: #333;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
@@ -1716,15 +1720,15 @@ html:has(.game-over-section) {
 }
 
 .winner-name {
-  font-size: 2.2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .winner-title {
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: #ffd700;
   font-weight: 600;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
@@ -1733,17 +1737,17 @@ html:has(.game-over-section) {
 /* Winning Answer Showcase */
 .winning-answer-showcase {
   width: 100%;
-  max-width: 800px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 12px;
 }
 
 .question-display,
 .answer-spotlight {
   background: rgba(255, 255, 255, 0.1);
-  padding: 25px;
-  border-radius: 20px;
+  padding: 15px 25px;
+  border-radius: 15px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -1751,8 +1755,8 @@ html:has(.game-over-section) {
 .question-display h3,
 .answer-spotlight h3 {
   color: white;
-  font-size: 1.4rem;
-  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  margin: 0 0 10px 0;
   font-weight: 700;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
@@ -1760,9 +1764,9 @@ html:has(.game-over-section) {
 .question-card-display {
   background: #2c3e50;
   color: white;
-  padding: 20px;
-  border-radius: 15px;
-  font-size: 1.2rem;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 1rem;
   font-weight: 600;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
@@ -1771,14 +1775,14 @@ html:has(.game-over-section) {
 .winning-answer-card {
   position: relative;
   background: linear-gradient(145deg, #28a745, #20c997);
-  padding: 25px;
-  border-radius: 15px;
+  padding: 15px;
+  border-radius: 12px;
   box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);
   overflow: hidden;
 }
 
 .answer-content {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: white;
   text-align: center;
@@ -1810,24 +1814,24 @@ html:has(.game-over-section) {
 
 .complete-sentence-display {
   background: rgba(255, 255, 255, 0.95);
-  padding: 25px;
-  border-radius: 20px;
+  padding: 20px 30px;
+  border-radius: 15px;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .complete-sentence-display h4 {
   color: #333;
-  font-size: 1.2rem;
-  margin: 0 0 15px 0;
+  font-size: 1rem;
+  margin: 0 0 8px 0;
   font-weight: 700;
 }
 
 .complete-sentence {
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #2c3e50;
-  line-height: 1.6;
+  line-height: 1.4;
   font-style: italic;
 }
 
@@ -1835,23 +1839,23 @@ html:has(.game-over-section) {
 .next-round-countdown {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
+  margin: 8px 0;
 }
 
 .countdown-container {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
   background: rgba(255, 255, 255, 0.1);
-  padding: 20px 30px;
-  border-radius: 20px;
+  padding: 12px 20px;
+  border-radius: 15px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .countdown-circle {
-  width: 80px;
-  height: 80px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   background: linear-gradient(45deg, #ff6b6b, #ee5a24);
   display: flex;
@@ -1862,7 +1866,7 @@ html:has(.game-over-section) {
 }
 
 .countdown-number {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 900;
   color: white;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
@@ -1875,13 +1879,13 @@ html:has(.game-over-section) {
 }
 
 .next-round-label {
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 700;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .countdown-subtitle {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 500;
   opacity: 0.9;
 }
@@ -1889,12 +1893,12 @@ html:has(.game-over-section) {
 /* Mini Scoreboard */
 .mini-scoreboard {
   background: rgba(255, 255, 255, 0.1);
-  padding: 25px;
-  border-radius: 20px;
+  padding: 15px 25px;
+  border-radius: 15px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   width: 100%;
-  max-width: 500px;
+  max-width: 100%;
 }
 
 .mini-scoreboard h3 {

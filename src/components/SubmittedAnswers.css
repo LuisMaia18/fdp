@@ -11,6 +11,8 @@
   flex-direction: column;
   align-items: center;
   animation: fadeInUp 0.5s ease;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
 }
 
 @keyframes fadeInUp {
@@ -128,44 +130,51 @@
 }
 
 .complete-sentence {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: #1a1a1a;
-  line-height: 1.6;
+  line-height: 1.7;
   margin-bottom: 18px;
-  font-weight: 600;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .complete-sentence strong {
-  color: #4a90e2;
-  font-weight: 800;
-  background: rgba(74, 144, 226, 0.15);
-  padding: 3px 8px;
+  color: #2563eb;
+  font-weight: 900;
+  background: rgba(74, 144, 226, 0.25);
+  padding: 4px 10px;
   border-radius: 6px;
+  text-decoration: underline;
+  text-decoration-color: #4a90e2;
+  text-decoration-thickness: 2px;
 }
 
 .answer-highlight {
-  background: rgba(74, 144, 226, 0.12);
+  background: rgba(74, 144, 226, 0.2);
   backdrop-filter: blur(5px);
-  padding: 18px 22px;
+  padding: 20px 25px;
   border-radius: 12px;
-  border-left: 5px solid #4a90e2;
+  border-left: 6px solid #4a90e2;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.15);
 }
 
 .answer-label {
-  color: #4a90e2;
-  font-weight: 700;
-  font-size: 0.95rem;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 1rem;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .answer-text {
   color: #1a1a1a;
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .vote-indicator {
@@ -174,18 +183,20 @@
   align-items: center;
   gap: 5px;
   padding: 15px;
-  background: linear-gradient(45deg, #28a745, #20c997);
+  background: linear-gradient(135deg, #28a745, #20c997);
   color: white;
   border-radius: 15px;
-  opacity: 0;
-  transform: translateX(20px);
+  opacity: 0.7;
+  transform: translateX(0);
   transition: all 0.3s ease;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
 }
 
 .answer-option.votable:hover .vote-indicator {
   opacity: 1;
-  transform: translateX(0);
+  transform: scale(1.1);
+  box-shadow: 0 6px 18px rgba(40, 167, 69, 0.6);
 }
 
 .vote-icon {
