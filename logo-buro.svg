@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Minimal vector version of the provided BURÓ logo: hand dropping a piece inside a square with text 'BURÓ' below. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BURÓ logo">
+  <rect width="512" height="512" fill="#ffffff"/>
+  <g fill="#000000">
+    <!-- Outer square frame -->
+    <rect x="40" y="40" width="432" height="352" fill="none" stroke="#000" stroke-width="32"/>
+    <!-- Stylized hand silhouette -->
+    <path d="M120 140c40-20 100-30 140-28 40 2 80 12 120 26 10 4 18 12 22 22 3 8 0 18-7 24-7 7-18 9-27 6-34-13-68-20-104-22-36-2-74 5-114 22-9 4-20 1-26-7-7-9-5-22 6-27z"/>
+    <path d="M310 180c8-2 16 2 20 9l28 54c4 8 1 18-7 22-8 4-18 1-22-7l-28-54c-4-8-1-18 9-24z"/>
+    <!-- Dropping piece -->
+    <circle cx="368" cy="306" r="16"/>
+    <path d="M360 282c-8-12-20-22-36-30-10-4-14-15-10-24s15-14 24-10c24 10 42 24 54 42 6 9 3 21-6 27-9 7-21 4-26-5z"/>
+    <!-- Bottom text BURÓ -->
+    <g transform="translate(40,408)">
+      <rect x="0" y="0" width="432" height="64" fill="#000"/>
+      <g fill="#fff" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="48">
+        <text x="24" y="48">BURÓ</text>
+      </g>
+    </g>
+  </g>
+</svg>
