@@ -4,9 +4,16 @@
   "version": "1.0.0",
   "description": "Jogo de cartas online Foi De Propósito - Complete frases de forma engraçada e absurda!",
   "type": "module",
-  "keywords": ["jogo", "cartas", "online", "humor", "react", "fdp"],
+  "keywords": [
+    "jogo",
+    "cartas",
+    "online",
+    "humor",
+    "react",
+    "fdp"
+  ],
   "author": "Desenvolvedor",
-  "homepage": ".",
+  "homepage": "https://luismaia18.github.io/fdp",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -16,7 +23,9 @@
     "clean": "rm -rf dist",
     "build:clean": "npm run clean && npm run build",
     "serve": "npm run build && npm run preview",
-    "analyze": "npm run build && npx vite-bundle-analyzer dist/stats.html"
+    "analyze": "npm run build && npx vite-bundle-analyzer dist/stats.html",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "react": "^19.1.1",
@@ -30,7 +39,9 @@
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "gh-pages": "^6.3.0",
     "globals": "^16.4.0",
+    "vercel": "^48.10.14",
     "vite": "^7.1.7"
   }
 }

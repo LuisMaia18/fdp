@@ -737,20 +737,33 @@ export function GameProvider({ children }) {
       const thinkingTime = 2000 + Math.random() * 6000;
       
       setTimeout(() => {
-        // Verifica se ainda está na fase de jogo e bot não jogou
-        if (stateRef.current.gameState === GAME_STATES.PLAYING && !stateRef.current.submittedAnswers[bot.id]) {
-          const botHand = stateRef.current.playerHands[bot.id] || [];
-          if (botHand.length > 0) {
-            const chosenCard = chooseBestBotCard(stateRef.current.currentQuestionCard, botHand);
-            if (chosenCard) {
-              console.log(`🤖 Bot ${bot.name} escolheu carta:`, chosenCard);
-              dispatch({
-                type: ACTIONS.SUBMIT_ANSWER,
-                payload: { playerId: bot.id, answerCard: chosenCard }
-              });
-              postMessageBC('ANSWER_SUBMITTED', { playerId: bot.id, answerCard: chosenCard });
-            }
-          }
+        const currentState = stateRef.current;
+        
+        // Verificações de segurança
+        if (currentState.gameState !== GAME_STATES.PLAYING) {
+          console.log(`🤖 Bot ${bot.name} cancelou jogada - jogo não está em PLAYING`);
+          return;
+        }
+        
+        if (currentState.submittedAnswers[bot.id]) {
+          console.log(`🤖 Bot ${bot.name} cancelou jogada - já jogou`);
+          return;
+        }
+        
+        const botHand = currentState.playerHands[bot.id] || [];
+        if (botHand.length === 0) {
+          console.log(`🤖 Bot ${bot.name} não tem cartas na mão`);
+          return;
+        }
+        
+        const chosenCard = chooseBestBotCard(currentState.currentQuestionCard, botHand);
+        if (chosenCard) {
+          console.log(`🤖 Bot ${bot.name} escolheu carta:`, chosenCard);
+          dispatch({
+            type: ACTIONS.SUBMIT_ANSWER,
+            payload: { playerId: bot.id, answerCard: chosenCard }
+          });
+          postMessageBC('ANSWER_SUBMITTED', { playerId: bot.id, answerCard: chosenCard });
         }
       }, thinkingTime);
     });
@@ -900,11 +913,18 @@ export function GameProvider({ children }) {
               if (stateRef.current.isHost) {
                 setTimeout(() => {
                   const s = stateRef.current;
+                  // Verifica se ainda estamos em PLAYING antes de avançar
+                  if (s.gameState !== GAME_STATES.PLAYING) return;
+                  
                   const needed = s.players.filter(p => p.id !== s.currentFDP).length;
-                  const received = new Set([...Object.keys(s.submittedAnswers), playerId]).size;
-                  if (received >= needed && s.gameState === GAME_STATES.PLAYING) {
+                  const received = Object.keys(s.submittedAnswers).length;
+                  
+                  console.log(`📊 Respostas: ${received}/${needed} recebidas`);
+                  
+                  if (received >= needed) {
+                    console.log('✅ Todas as respostas recebidas! Avançando para votação...');
                     // Define uma ordem estável (aleatória apenas UMA vez) das respostas
-                    const ids = Array.from(new Set([...Object.keys(s.submittedAnswers), playerId]));
+                    const ids = Object.keys(s.submittedAnswers);
                     const randomized = [...ids].sort(() => Math.random() - 0.5);
                     dispatch({ type: ACTIONS.SET_ANSWER_ORDER, payload: randomized });
                     dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.ROUND_VOTING });
@@ -912,9 +932,9 @@ export function GameProvider({ children }) {
                       dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: s.gameConfig.votingTimer });
                     }
                     // Host envia snapshot para alinhar todos (após reducers processarem)
-                    setTimeout(() => sendSnapshot(), 0);
+                    setTimeout(() => sendSnapshot(), 10);
                   }
-                }, 0);
+                }, 50);
               }
             }
             break;
