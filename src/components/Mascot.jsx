@@ -30,7 +30,7 @@ function Mascot({
       aria-label={ariaLabel}
     >
       <div className="mascot-ring" aria-hidden="true" />
-      <img className="mascot-img" src="/mascot_monkey.svg" alt="" loading="lazy" />
+      <img className="mascot-img" src={`${import.meta.env.BASE_URL}mascot_monkey.svg`} alt="" loading="lazy" />
       {speech && (
         <div className="mascot-speech" aria-hidden="true">{speech}</div>
       )}
