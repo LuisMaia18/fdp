@@ -117,6 +117,74 @@
   text-align: center;
 }
 
+/* Aviso Multiplayer Local */
+.multiplayer-warning {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 152, 0, 0.15) 100%);
+  border: 2px solid rgba(255, 193, 7, 0.4);
+  border-left: 5px solid #ffc107;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  display: flex;
+  gap: 15px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+  animation: warningPulse 2s ease-in-out infinite;
+}
+
+@keyframes warningPulse {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+  }
+}
+
+.warning-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  animation: warningShake 3s ease-in-out infinite;
+}
+
+@keyframes warningShake {
+  0%, 90%, 100% {
+    transform: rotate(0deg);
+  }
+  92%, 96% {
+    transform: rotate(-10deg);
+  }
+  94%, 98% {
+    transform: rotate(10deg);
+  }
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-content strong {
+  display: block;
+  color: #ffc107;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.warning-content p {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 5px 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.warning-content p strong {
+  display: inline;
+  color: #ffffff;
+  font-weight: 700;
+}
+
 /* ===================================== */
 /*        FORMULÁRIO DE NOME             */
 /* ===================================== */

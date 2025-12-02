@@ -153,6 +153,16 @@ function Lobby() {
             <div className="actions-section">
               <h2>🎮 Começar a Jogar</h2>
               
+              {/* Aviso Multiplayer Local */}
+              <div className="multiplayer-warning">
+                <div className="warning-icon">⚠️</div>
+                <div className="warning-content">
+                  <strong>Atenção: Multiplayer Local</strong>
+                  <p>Atualmente o jogo funciona apenas com jogadores <strong>no mesmo computador</strong> (abas diferentes do navegador).</p>
+                  <p>Para jogar com amigos em outros PCs, todos devem abrir o jogo e adicionar <strong>bots</strong> como jogadores.</p>
+                </div>
+              </div>
+              
               {/* Formulário de Nome */}
               <div className="name-form-compact">
                 <label>Seu nome no jogo:</label>
