@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { dealInitialCards, getNextQuestionCard, shuffleArray } from '../data/cards';
+import peerService from '../services/PeerService';
 
 // ===================================
 // BOT AI - Sistema inteligente de escolha de cartas
@@ -846,8 +847,9 @@ export function GameProvider({ children }) {
   // Funções auxiliares
   // ---------------------------------
   const postMessageBC = (type, payload) => {
-    if (!channelRef.current) return;
-    channelRef.current.postMessage({ type, payload, sender: clientIdRef.current, ts: Date.now() });
+    if (!peerService.peer) return;
+    const message = JSON.stringify({ type, payload, sender: clientIdRef.current, ts: Date.now() });
+    peerService.broadcast(message);
   };
 
   const sendSnapshot = React.useCallback(() => {
@@ -858,22 +860,15 @@ export function GameProvider({ children }) {
     });
   }, []);
 
-  // BroadcastChannel para sincronizar entre abas do mesmo navegador
-  // BroadcastChannel para sincronizar entre abas do mesmo navegador
+  // PeerJS para sincronizar entre computadores diferentes
   useEffect(() => {
-    // Recria o canal quando o roomCode muda
+    // Inicializa peer quando o roomCode muda
     if (state.roomCode && roomRef.current !== state.roomCode) {
-      // Fecha canal anterior
-      if (channelRef.current) {
-  try { channelRef.current.close(); } catch { /* noop */ }
-      }
-      const name = `fdp-room-${state.roomCode}`;
-      const ch = new BroadcastChannel(name);
-      channelRef.current = ch;
       roomRef.current = state.roomCode;
 
-      ch.onmessage = (ev) => {
-        const msg = ev.data || {};
+      // Handler para mensagens recebidas
+      const handleMessage = (data) => {
+        const msg = typeof data === 'string' ? JSON.parse(data) : data;
         if (!msg || msg.sender === clientIdRef.current) return; // ignora a si mesmo
         const { type, payload } = msg;
         switch (type) {
@@ -973,28 +968,62 @@ export function GameProvider({ children }) {
         }
       };
 
-      // Anuncia presença do jogador atual, se houver, antes de pedir snapshot
-      if (stateRef.current.currentPlayer) {
-        postMessageBC('PLAYER_JOIN', stateRef.current.currentPlayer);
-      }
-      // Se não é host, pede snapshot logo em seguida (ligeiro atraso para o host processar o JOIN)
-      if (!stateRef.current.isHost) {
-        setTimeout(() => postMessageBC('SNAPSHOT_REQUEST', null), 50);
+      // Registra handler de mensagens
+      peerService.onMessage(handleMessage);
+
+      // Inicializa PeerJS
+      const initPeer = async () => {
+        try {
+          if (state.isHost) {
+            console.log('🎮 Inicializando como HOST...');
+            await peerService.initializeAsHost(state.roomCode);
+            console.log('✅ Host inicializado com sucesso!');
+          } else {
+            console.log('👥 Conectando à sala como PLAYER...');
+            await peerService.connectToRoom(state.roomCode);
+            console.log('✅ Conectado à sala com sucesso!');
+            
+            // Anuncia presença e pede snapshot
+            if (stateRef.current.currentPlayer) {
+              postMessageBC('PLAYER_JOIN', stateRef.current.currentPlayer);
+            }
+            setTimeout(() => postMessageBC('SNAPSHOT_REQUEST', null), 100);
+          }
+        } catch (error) {
+          console.error('❌ Erro ao inicializar peer:', error);
+          dispatch({ type: ACTIONS.SET_ERROR, payload: 'Erro ao conectar à sala. Tente novamente.' });
+        }
+      };
+
+      initPeer();
+
+      // Anuncia presença se já tiver player (caso de host)
+      if (state.isHost && stateRef.current.currentPlayer) {
+        setTimeout(() => postMessageBC('PLAYER_JOIN', stateRef.current.currentPlayer), 200);
       }
     }
+    
     // cleanup ao desmontar
-    return () => {};
+    return () => {
+      peerService.removeMessageListener(handleMessage);
+    };
   }, [state.roomCode, state.isHost, sendSnapshot]);
 
   // Broadcast leave ao fechar/atualizar a aba
   useEffect(() => {
     const onBeforeUnload = () => {
       if (stateRef.current.currentPlayer) {
-  try { postMessageBC('PLAYER_LEAVE', stateRef.current.currentPlayer.id); } catch { /* noop */ }
+        try { 
+          postMessageBC('PLAYER_LEAVE', stateRef.current.currentPlayer.id);
+          peerService.disconnect();
+        } catch { /* noop */ }
       }
     };
     window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      peerService.disconnect();
+    };
   }, []);
 
   const actions = {

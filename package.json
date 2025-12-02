@@ -28,6 +28,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "peerjs": "^1.5.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

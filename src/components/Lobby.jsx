@@ -153,13 +153,14 @@ function Lobby() {
             <div className="actions-section">
               <h2>🎮 Começar a Jogar</h2>
               
-              {/* Aviso Multiplayer Local */}
-              <div className="multiplayer-warning">
-                <div className="warning-icon">⚠️</div>
+              {/* Aviso Multiplayer P2P */}
+              <div className="multiplayer-warning multiplayer-success">
+                <div className="warning-icon">🌐</div>
                 <div className="warning-content">
-                  <strong>Atenção: Multiplayer Local</strong>
-                  <p>Atualmente o jogo funciona apenas com jogadores <strong>no mesmo computador</strong> (abas diferentes do navegador).</p>
-                  <p>Para jogar com amigos em outros PCs, todos devem abrir o jogo e adicionar <strong>bots</strong> como jogadores.</p>
+                  <strong>✨ Multiplayer Online Ativado!</strong>
+                  <p>Agora você pode jogar com amigos em <strong>computadores diferentes</strong> usando conexão P2P!</p>
+                  <p><strong>Como funciona:</strong> Um jogador cria a sala e compartilha o código. Os outros entram com o código.</p>
+                  <p className="tip">💡 <em>Dica:</em> Se tiver problemas de conexão, todos na mesma rede Wi-Fi funciona melhor!</p>
                 </div>
               </div>
               
