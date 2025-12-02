@@ -101,6 +101,10 @@
   justify-content: center;
 }
 
+.actions-section {
+  margin-top: 500px;
+}
+
 .actions-section h2 {
   margin: 0 0 25px 0;
   font-size: 1.8rem;
