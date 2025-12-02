@@ -866,114 +866,114 @@ export function GameProvider({ children }) {
     if (state.roomCode && roomRef.current !== state.roomCode) {
       roomRef.current = state.roomCode;
 
-      // Handler para mensagens recebidas
-      const handleMessage = (data) => {
-        const msg = typeof data === 'string' ? JSON.parse(data) : data;
-        if (!msg || msg.sender === clientIdRef.current) return; // ignora a si mesmo
-        const { type, payload } = msg;
-        switch (type) {
-          case 'PLAYER_JOIN': {
-            const exists = stateRef.current.players.some(p => p.id === payload.id);
-            if (!exists) {
-              dispatch({ type: ACTIONS.ADD_PLAYER, payload });
-            }
-            // Se somos host, mandamos um snapshot após pequeno atraso para garantir estado atualizado
-            if (stateRef.current.isHost) setTimeout(() => sendSnapshot(), 50);
-            break;
-          }
-          case 'PLAYER_LEAVE': {
-            dispatch({ type: ACTIONS.REMOVE_PLAYER, payload });
-            // Se fomos nós que fomos removidos pelo host, exibe aviso local
-            const localId = stateRef.current.currentPlayer?.id;
-            const weWereKicked = localId && payload === localId;
-            if (weWereKicked) {
-              dispatch({ type: ACTIONS.SET_KICKED_MESSAGE, payload: 'O host te removeu da sala.' });
-            }
-            if (stateRef.current.isHost) sendSnapshot();
-            break;
-          }
-          case 'STATE_SNAPSHOT': {
-            isApplyingRemoteRef.current = true;
-            dispatch({ type: ACTIONS.APPLY_SNAPSHOT, payload });
-            // pequena janela para não rebroadcastar
-            setTimeout(() => { isApplyingRemoteRef.current = false; }, 0);
-            break;
-          }
-          case 'ANSWER_SUBMITTED': {
-            // Atualiza submissão de qualquer jogador nas demais abas
-            const { playerId, answerCard } = payload || {};
-            if (playerId && answerCard) {
-              dispatch({ type: ACTIONS.SUBMIT_ANSWER, payload: { playerId, answerCard } });
-              // Se somos host, ao recebermos a última resposta, avançamos para votação e sincronizamos
-              if (stateRef.current.isHost) {
-                setTimeout(() => {
-                  const s = stateRef.current;
-                  // Verifica se ainda estamos em PLAYING antes de avançar
-                  if (s.gameState !== GAME_STATES.PLAYING) return;
-                  
-                  const needed = s.players.filter(p => p.id !== s.currentFDP).length;
-                  const received = Object.keys(s.submittedAnswers).length;
-                  
-                  console.log(`📊 Respostas: ${received}/${needed} recebidas`);
-                  
-                  if (received >= needed) {
-                    console.log('✅ Todas as respostas recebidas! Avançando para votação...');
-                    // Define uma ordem estável (aleatória apenas UMA vez) das respostas
-                    const ids = Object.keys(s.submittedAnswers);
-                    const randomized = [...ids].sort(() => Math.random() - 0.5);
-                    dispatch({ type: ACTIONS.SET_ANSWER_ORDER, payload: randomized });
-                    dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.ROUND_VOTING });
-                    if (s.gameConfig.votingTimer > 0) {
-                      dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: s.gameConfig.votingTimer });
-                    }
-                    // Host envia snapshot para alinhar todos (após reducers processarem)
-                    setTimeout(() => sendSnapshot(), 10);
-                  }
-                }, 50);
-              }
-            }
-            break;
-          }
-          case 'WINNER_SELECTED': {
-            if (stateRef.current.isHost) {
-              const winnerId = payload?.winnerId;
-              const s = stateRef.current;
-              if (winnerId && s.gameState === GAME_STATES.ROUND_VOTING) {
-                dispatch({ type: ACTIONS.SET_ROUND_WINNER, payload: winnerId });
-                const newScore = (s.scores[winnerId] || 0) + 1;
-                if (newScore >= s.gameConfig.winningScore) {
-                  dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.GAME_OVER });
-                  setTimeout(() => sendSnapshot(), 10);
-                } else {
-                  dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.ROUND_RESULTS });
-                  setTimeout(() => sendSnapshot(), 10);
-                  setTimeout(() => {
-                    dispatch({ type: ACTIONS.NEXT_ROUND });
-                    dispatch({ type: ACTIONS.SET_QUESTION_CARD });
-                    dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.PLAYING });
-                    dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: stateRef.current.gameConfig.roundTimer });
-                    setTimeout(() => sendSnapshot(), 10);
-                  }, (stateRef.current.gameConfig?.resultsDelaySec ?? 3) * 1000);
-                }
-              }
-            }
-            break;
-          }
-          case 'SNAPSHOT_REQUEST': {
-            if (stateRef.current.isHost) sendSnapshot();
-            break;
-          }
-          default:
-            break;
-        }
-      };
-
-      // Registra handler de mensagens
-      peerService.onMessage(handleMessage);
-
       // Inicializa PeerJS
       const initPeer = async () => {
         try {
+          // Handler para mensagens recebidas - DEFINIDO ANTES de registrar
+          const handleMessage = (data) => {
+            const msg = typeof data === 'string' ? JSON.parse(data) : data;
+            if (!msg || msg.sender === clientIdRef.current) return; // ignora a si mesmo
+            const { type, payload } = msg;
+            switch (type) {
+              case 'PLAYER_JOIN': {
+                const exists = stateRef.current.players.some(p => p.id === payload.id);
+                if (!exists) {
+                  dispatch({ type: ACTIONS.ADD_PLAYER, payload });
+                }
+                // Se somos host, mandamos um snapshot após pequeno atraso para garantir estado atualizado
+                if (stateRef.current.isHost) setTimeout(() => sendSnapshot(), 50);
+                break;
+              }
+              case 'PLAYER_LEAVE': {
+                dispatch({ type: ACTIONS.REMOVE_PLAYER, payload });
+                // Se fomos nós que fomos removidos pelo host, exibe aviso local
+                const localId = stateRef.current.currentPlayer?.id;
+                const weWereKicked = localId && payload === localId;
+                if (weWereKicked) {
+                  dispatch({ type: ACTIONS.SET_KICKED_MESSAGE, payload: 'O host te removeu da sala.' });
+                }
+                if (stateRef.current.isHost) sendSnapshot();
+                break;
+              }
+              case 'STATE_SNAPSHOT': {
+                isApplyingRemoteRef.current = true;
+                dispatch({ type: ACTIONS.APPLY_SNAPSHOT, payload });
+                // pequena janela para não rebroadcastar
+                setTimeout(() => { isApplyingRemoteRef.current = false; }, 0);
+                break;
+              }
+              case 'ANSWER_SUBMITTED': {
+                // Atualiza submissão de qualquer jogador nas demais abas
+                const { playerId, answerCard } = payload || {};
+                if (playerId && answerCard) {
+                  dispatch({ type: ACTIONS.SUBMIT_ANSWER, payload: { playerId, answerCard } });
+                  // Se somos host, ao recebermos a última resposta, avançamos para votação e sincronizamos
+                  if (stateRef.current.isHost) {
+                    setTimeout(() => {
+                      const s = stateRef.current;
+                      // Verifica se ainda estamos em PLAYING antes de avançar
+                      if (s.gameState !== GAME_STATES.PLAYING) return;
+                      
+                      const needed = s.players.filter(p => p.id !== s.currentFDP).length;
+                      const received = Object.keys(s.submittedAnswers).length;
+                      
+                      console.log(`📊 Respostas: ${received}/${needed} recebidas`);
+                      
+                      if (received >= needed) {
+                        console.log('✅ Todas as respostas recebidas! Avançando para votação...');
+                        // Define uma ordem estável (aleatória apenas UMA vez) das respostas
+                        const ids = Object.keys(s.submittedAnswers);
+                        const randomized = [...ids].sort(() => Math.random() - 0.5);
+                        dispatch({ type: ACTIONS.SET_ANSWER_ORDER, payload: randomized });
+                        dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.ROUND_VOTING });
+                        if (s.gameConfig.votingTimer > 0) {
+                          dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: s.gameConfig.votingTimer });
+                        }
+                        // Host envia snapshot para alinhar todos (após reducers processarem)
+                        setTimeout(() => sendSnapshot(), 10);
+                      }
+                    }, 50);
+                  }
+                }
+                break;
+              }
+              case 'WINNER_SELECTED': {
+                if (stateRef.current.isHost) {
+                  const winnerId = payload?.winnerId;
+                  const s = stateRef.current;
+                  if (winnerId && s.gameState === GAME_STATES.ROUND_VOTING) {
+                    dispatch({ type: ACTIONS.SET_ROUND_WINNER, payload: winnerId });
+                    const newScore = (s.scores[winnerId] || 0) + 1;
+                    if (newScore >= s.gameConfig.winningScore) {
+                      dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.GAME_OVER });
+                      setTimeout(() => sendSnapshot(), 10);
+                    } else {
+                      dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.ROUND_RESULTS });
+                      setTimeout(() => sendSnapshot(), 10);
+                      setTimeout(() => {
+                        dispatch({ type: ACTIONS.NEXT_ROUND });
+                        dispatch({ type: ACTIONS.SET_QUESTION_CARD });
+                        dispatch({ type: ACTIONS.SET_GAME_STATE, payload: GAME_STATES.PLAYING });
+                        dispatch({ type: ACTIONS.SET_TIME_REMAINING, payload: stateRef.current.gameConfig.roundTimer });
+                        setTimeout(() => sendSnapshot(), 10);
+                      }, (stateRef.current.gameConfig?.resultsDelaySec ?? 3) * 1000);
+                    }
+                  }
+                }
+                break;
+              }
+              case 'SNAPSHOT_REQUEST': {
+                if (stateRef.current.isHost) sendSnapshot();
+                break;
+              }
+              default:
+                break;
+            }
+          };
+
+          // Registra handler de mensagens ANTES de inicializar
+          peerService.onMessage(handleMessage);
+
           if (state.isHost) {
             console.log('🎮 Inicializando como HOST...');
             await peerService.initializeAsHost(state.roomCode);
